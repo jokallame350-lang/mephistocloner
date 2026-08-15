@@ -107,6 +107,13 @@
             <span class="badge-count" id="historyCount">2</span>
           </button>
 
+          <!-- Community Showcase / Templates Trigger -->
+          <button class="header-btn" id="btnOpenCommunityModal" title="Explore Community Clones & Templates">
+            <i class="fa-solid fa-compass text-cyan"></i>
+            <span class="btn-label">Templates</span>
+            <span class="badge-count" id="communityTemplatesCount">6</span>
+          </button>
+
           <!-- 1-Click Deploy Trigger (Header) -->
           <button class="header-btn deploy-primary-btn" id="btnHeaderDeploy" title="1-Click Deploy to GitHub & Vercel">
             <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -580,6 +587,9 @@
                     </div>
 
                     <div class="toolbar-editor-actions">
+                      <button class="mini-btn text-purple" id="btnOpenVisionHealing" title="Vision AI Self-Healing & Visual Diff"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Healing</button>
+                      <button class="mini-btn text-blue-400" id="btnOpenFullStackDb" title="Generate Full-Stack Database & Prisma"><i class="fa-solid fa-database"></i> DB Schema</button>
+                      <button class="mini-btn text-emerald-400" id="btnOpenMultiPlatform" title="Export to Mobile (React Native / Flutter) & Figma"><i class="fa-solid fa-mobile-screen"></i> Mobile/Figma</button>
                       <button class="mini-btn" id="btnFormatCode" title="Format Code"><i class="fa-solid fa-align-left"></i> Format</button>
                       <button class="mini-btn" id="btnCopyLiveCode" title="Copy Code"><i class="fa-regular fa-copy"></i> Copy</button>
                       <button class="mini-btn" id="btnDownloadCodeFile" title="Download File"><i class="fa-solid fa-download"></i> Save</button>
@@ -666,6 +676,9 @@
                     </div>
 
                     <div class="sandbox-toolbar-actions">
+                      <button class="mini-btn" id="btnToggleWysiwygInspector" title="Click-to-Inspect Element (WYSIWYG 2-Way Sync)">
+                        <i class="fa-solid fa-crosshairs text-cyan"></i> Inspect
+                      </button>
                       <button class="mini-btn" id="btnToggleConsoleLogs" title="Toggle Console Output">
                         <i class="fa-solid fa-terminal"></i> Console
                       </button>
@@ -1419,6 +1432,161 @@
         <div class="modal-footer justify-between">
           <button class="mini-btn danger" id="clearHistoryBtn"><i class="fa-solid fa-trash-can"></i> Clear All Projects</button>
           <button class="mini-btn" id="btnCloseProjectLibrary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL 5: VISION AI SELF-HEALING & VISUAL DIFF ═══════════════════ -->
+    <div class="modal-backdrop" id="visionHealingModal" style="display: none;">
+      <div class="modal-card glass-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="fa-solid fa-wand-magic-sparkles modal-icon text-purple"></i>
+            <div>
+              <h3 class="modal-title">Vision AI Self-Healing & Visual Diff Engine</h3>
+              <p class="modal-subtitle">Detects visual discrepancies against original design tokens and applies surgical Tailwind patches</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="closeVisionModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="vision-score-banner">
+            <div class="score-card current">
+              <span class="score-label">Current Similarity</span>
+              <span class="score-number text-amber" id="visionCurrentScore">86%</span>
+            </div>
+            <div class="score-arrow"><i class="fa-solid fa-arrow-right text-purple"></i></div>
+            <div class="score-card projected">
+              <span class="score-label">Projected Post-Healing</span>
+              <span class="score-number text-emerald" id="visionProjectedScore">100%</span>
+            </div>
+            <div class="score-desc">
+              <span class="badge-status-pill success"><i class="fa-solid fa-circle-check"></i> <span id="visionIssueCount">5 Visual Discrepancies</span> Detected</span>
+              <p class="text-xs text-slate-400 mt-1">Multi-modal Vision models (Claude 3.7 / GPT-4o) identified typography scales, padding, and elevation improvements.</p>
+            </div>
+          </div>
+
+          <div class="vision-diff-list-wrap">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3"><i class="fa-solid fa-list-check text-indigo-400"></i> Surgical Patch Checklist:</h4>
+            <div class="patch-cards-container" id="visionPatchList">
+              <!-- Patches populated via JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer justify-between">
+          <button class="mini-btn" id="btnReanalyzeVision"><i class="fa-solid fa-rotate"></i> Re-Analyze</button>
+          <button class="btn-primary btn-heal-glow" id="btnApplyVisionPatches"><i class="fa-solid fa-wand-magic-sparkles"></i> Apply Healed Code to Studio</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL 6: FULL-STACK DATABASE & PRISMA GENERATOR ═══════════════════ -->
+    <div class="modal-backdrop" id="fullStackDbModal" style="display: none;">
+      <div class="modal-card glass-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="fa-solid fa-database modal-icon text-blue-400"></i>
+            <div>
+              <h3 class="modal-title">Full-Stack Database & Server Actions Engine</h3>
+              <p class="modal-subtitle">Auto-generates Prisma, Drizzle, Supabase SQL, and Next.js 15 Server Actions from UI data</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="closeDbModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="sub-tab-bar">
+            <button class="sub-tab-btn active" data-db-tab="tabPrisma"><i class="fa-solid fa-layer-group text-blue-400"></i> Prisma Schema</button>
+            <button class="sub-tab-btn" data-db-tab="tabDrizzle"><i class="fa-solid fa-droplet text-amber"></i> Drizzle ORM</button>
+            <button class="sub-tab-btn" data-db-tab="tabSupabase"><i class="fa-solid fa-bolt text-emerald"></i> Supabase SQL</button>
+            <button class="sub-tab-btn" data-db-tab="tabServerActions"><i class="fa-solid fa-code text-purple"></i> Server Actions</button>
+          </div>
+
+          <div class="db-code-view-pane">
+            <textarea id="fullStackDbCodeViewer" class="db-code-textarea" readonly spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer justify-between">
+          <button class="mini-btn" id="btnCopyDbCode"><i class="fa-regular fa-copy"></i> Copy Active File</button>
+          <button class="btn-primary" id="btnDownloadDbBundle"><i class="fa-solid fa-download"></i> Download Database Bundle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL 7: MULTI-PLATFORM (REACT NATIVE & FIGMA) ═══════════════════ -->
+    <div class="modal-backdrop" id="multiPlatformModal" style="display: none;">
+      <div class="modal-card glass-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="fa-solid fa-mobile-screen modal-icon text-emerald-400"></i>
+            <div>
+              <h3 class="modal-title">Multi-Platform Mobile & Figma Token Studio</h3>
+              <p class="modal-subtitle">Exports Web components to React Native (Expo), Flutter Dart, and W3C Figma Tokens Studio</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="closeMultiPlatformModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="sub-tab-bar">
+            <button class="sub-tab-btn active" data-platform-tab="tabReactNative"><i class="fa-brands fa-react text-cyan"></i> React Native (Expo)</button>
+            <button class="sub-tab-btn" data-platform-tab="tabFigmaTokens"><i class="fa-brands fa-figma text-pink-400"></i> Figma Tokens (W3C)</button>
+            <button class="sub-tab-btn" data-platform-tab="tabFlutter"><i class="fa-solid fa-dove text-blue-400"></i> Flutter (Dart)</button>
+          </div>
+
+          <div class="db-code-view-pane">
+            <textarea id="multiPlatformCodeViewer" class="db-code-textarea" readonly spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer justify-between">
+          <button class="mini-btn" id="btnCopyPlatformCode"><i class="fa-regular fa-copy"></i> Copy Code</button>
+          <button class="btn-primary" id="btnDownloadPlatformFile"><i class="fa-solid fa-download"></i> Download Export</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL 8: COMMUNITY SHOWCASE & TEMPLATE HUB ═══════════════════ -->
+    <div class="modal-backdrop" id="communityModal" style="display: none;">
+      <div class="modal-card glass-card modal-xl">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="fa-solid fa-compass modal-icon text-cyan"></i>
+            <div>
+              <h3 class="modal-title">Community Showcase & Master Clones Hub</h3>
+              <p class="modal-subtitle">1-Click fork production-ready website clones, SaaS apps, and prompt recipes</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="closeCommunityModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="community-toolbar">
+            <div class="community-search-wrap">
+              <i class="fa-solid fa-search text-slate-400"></i>
+              <input type="text" id="communitySearchInput" class="form-input" placeholder="Search templates (Kick, Stripe, Linear, Netflix, Mephisto)...">
+            </div>
+            <div class="community-filter-pills" id="communityCategoryPills">
+              <button class="filter-pill active" data-category="all">All Clones</button>
+              <button class="filter-pill" data-category="streaming">Streaming</button>
+              <button class="filter-pill" data-category="fintech">Fintech</button>
+              <button class="filter-pill" data-category="productivity">Productivity</button>
+              <button class="filter-pill" data-category="security">Security</button>
+              <button class="filter-pill" data-category="entertainment">Media</button>
+            </div>
+          </div>
+
+          <div class="community-grid" id="communityGrid">
+            <!-- Templates populated via JS -->
+          </div>
+        </div>
+
+        <div class="modal-footer justify-between">
+          <span class="text-xs text-slate-400">Showing <span id="communityVisibleCount">6</span> production clones • 1-Click Fork into Studio</span>
+          <button class="mini-btn" id="btnCloseCommunityHub">Close</button>
         </div>
       </div>
     </div>

@@ -13,6 +13,13 @@ const { handleStreamGenerate, streamGenerate } = require('./lib/ai-streaming-eng
 const { crawlMultiPage } = require('./lib/multi-page-crawler');
 const { deployToGitHub, deployToVercel } = require('./lib/deploy-service');
 
+// Enterprise 3.0 Engines
+const { analyzeVisualDifferences, applySelfHealingPatches, streamVisualHealingAsync } = require('./lib/vision-self-healing');
+const { scrapeViaCloudBrowser, testCloudConnection, analyzeOfflineFallback } = require('./lib/cloud-scraper-connector');
+const { generateFullStackDatabaseBundle, generatePrismaSchema, generateDrizzleSchema, generateSupabaseMigration, generateNextJsServerActions } = require('./lib/fullstack-db-generator');
+const { exportToReactNative, exportToFigmaTokens, exportToFlutter } = require('./lib/multi-platform-exporter');
+const communityHub = require('./lib/community-hub');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -143,6 +150,77 @@ app.post('/api/projects/:id/favorite', (req, res) => {
   res.json({ success: true, project });
 });
 
+// ─── COMMUNITY SHOWCASE & TEMPLATE HUB ─────────────────────────────
+app.get('/api/community/templates', (req, res) => {
+  const { category, framework, tag, featured, search, sort, limit, offset } = req.query;
+  const templates = communityHub.getCommunityTemplates(
+    {
+      category,
+      framework,
+      tag,
+      featured: featured !== undefined ? featured === 'true' : undefined,
+      sort,
+      limit: limit ? Number(limit) : undefined,
+      offset: offset ? Number(offset) : undefined
+    },
+    search
+  );
+  res.json({ success: true, templates, count: templates.length });
+});
+
+app.get('/api/community/templates/featured', (req, res) => {
+  res.json({ success: true, templates: communityHub.getFeaturedClones() });
+});
+
+app.get('/api/community/templates/:id', (req, res) => {
+  const template = communityHub.getTemplateById(req.params.id);
+  if (!template) {
+    return res.status(404).json({ success: false, error: 'Template not found' });
+  }
+  res.json({ success: true, template });
+});
+
+app.post('/api/community/templates/:id/fork', (req, res) => {
+  try {
+    const { userId, workspaceId, title } = req.body;
+    const result = communityHub.forkTemplate(req.params.id, userId, { workspaceId, title });
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/community/templates/:id/like', (req, res) => {
+  try {
+    const result = communityHub.likeTemplate(req.params.id);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/community/templates', (req, res) => {
+  try {
+    const { projectData, authorInfo } = req.body;
+    const result = communityHub.publishTemplate(projectData || req.body, authorInfo || req.body.author);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/community/categories', (req, res) => {
+  res.json({
+    success: true,
+    categories: communityHub.getCategories(),
+    tags: communityHub.getPopularTags()
+  });
+});
+
+app.get('/api/community/stats', (req, res) => {
+  res.json({ success: true, stats: communityHub.getHubStats() });
+});
+
 // ─── AI STREAMING GENERATION (SSE) ─────────────────────────────────
 app.post('/api/ai/stream-generate', handleStreamGenerate);
 
@@ -269,6 +347,143 @@ app.delete('/api/user/keys/:provider', (req, res) => {
   const provider = req.params.provider;
   db.saveByokKeys({ [provider]: '' });
   res.json({ success: true, message: `Removed key for ${provider}`, ...db.getByokKeys() });
+});
+
+// ─── ENTERPRISE 3.0: VISION AI SELF-HEALING & VISUAL DIFF ─────────
+app.post('/api/ai/visual-diff-healing', async (req, res) => {
+  const { originalTelemetry, generatedCode, model = 'claude-3-7-sonnet' } = req.body;
+  
+  if (!originalTelemetry || !generatedCode) {
+    return res.status(400).json({ success: false, error: 'originalTelemetry and generatedCode are required' });
+  }
+
+  try {
+    const analysis = analyzeVisualDifferences(originalTelemetry, generatedCode, { model });
+    const patchResult = applySelfHealingPatches(generatedCode, analysis.patches);
+
+    res.json({
+      success: true,
+      analysis,
+      healedCode: patchResult.healedCode,
+      appliedCount: patchResult.appliedCount,
+      similarityScore: analysis.score,
+      estimatedHealedScore: analysis.summary?.healedEstimatedScore || 98
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── ENTERPRISE 3.0: CLOUD SCRAPER EDGE CONNECTOR ──────────────────
+app.post('/api/cloud-scrape', async (req, res) => {
+  const { url, cloudConfig = {}, framework = 'react-tailwind', detailLevel = 'balanced' } = req.body;
+  if (!url) {
+    return res.status(400).json({ success: false, error: 'URL is required' });
+  }
+
+  try {
+    const telemetry = await scrapeViaCloudBrowser(url, cloudConfig);
+    const prompt = compilePrompt(telemetry, { framework, detailLevel });
+    res.json({
+      success: true,
+      url,
+      telemetry,
+      prompt,
+      tokenEstimate: estimateTokens(prompt),
+      framework
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/cloud-scrape/test', async (req, res) => {
+  const { cloudConfig = {} } = req.body;
+  const result = await testCloudConnection(cloudConfig);
+  res.json(result);
+});
+
+// ─── ENTERPRISE 3.0: FULL-STACK DATABASE & PRISMA GENERATOR ────────
+app.post('/api/generate-fullstack-db', (req, res) => {
+  const { telemetry, networkLogs = [], dbType = 'postgresql' } = req.body;
+  try {
+    const bundle = generateFullStackDatabaseBundle({ telemetry, networkLogs }, { dbType });
+    res.json({
+      success: true,
+      ...bundle
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── ENTERPRISE 3.0: MULTI-PLATFORM (REACT NATIVE / FIGMA) ─────────
+app.post('/api/export-multi-platform', (req, res) => {
+  const { code, telemetry, target = 'react-native' } = req.body;
+  try {
+    let result = {};
+    if (target === 'react-native') {
+      result = { reactNativeCode: exportToReactNative(code || '') };
+    } else if (target === 'figma') {
+      result = { figmaTokens: exportToFigmaTokens(telemetry || {}) };
+    } else if (target === 'flutter') {
+      result = { flutterCode: exportToFlutter(code || '') };
+    } else {
+      result = {
+        reactNativeCode: exportToReactNative(code || ''),
+        figmaTokens: exportToFigmaTokens(telemetry || {}),
+        flutterCode: exportToFlutter(code || '')
+      };
+    }
+    res.json({ success: true, target, ...result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── ENTERPRISE 3.0: COMMUNITY SHOWCASE & TEMPLATE HUB ─────────────
+app.get('/api/community/templates', (req, res) => {
+  const { category, framework, tag, search, sort } = req.query;
+  const result = communityHub.getCommunityTemplates({ category, framework, tag, search, sort });
+  res.json({ success: true, ...result });
+});
+
+app.get('/api/community/templates/:id', (req, res) => {
+  const template = communityHub.getTemplateById(req.params.id);
+  if (!template) {
+    return res.status(404).json({ success: false, error: 'Template not found' });
+  }
+  res.json({ success: true, template });
+});
+
+app.post('/api/community/fork/:id', (req, res) => {
+  try {
+    const result = communityHub.forkTemplate(req.params.id, req.body.userId || 'usr_pro_001');
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/community/publish', (req, res) => {
+  try {
+    const newTemplate = communityHub.publishTemplate(req.body.projectData, req.body.authorInfo);
+    res.json({ success: true, template: newTemplate });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/community/like/:id', (req, res) => {
+  const updated = communityHub.likeTemplate(req.params.id);
+  if (!updated) {
+    return res.status(404).json({ success: false, error: 'Template not found' });
+  }
+  res.json({ success: true, likes: updated.likes });
+});
+
+app.get('/api/community/stats', (req, res) => {
+  res.json({ success: true, stats: communityHub.getHubStatistics() });
 });
 
 // ─── CORE TELEMETRY & SCRAPER ENDPOINTS ────────────────────────────

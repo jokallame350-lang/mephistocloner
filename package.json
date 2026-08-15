@@ -6,13 +6,16 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node test/test-backend.js && node test/test-compiler.js && node test/test-deployer.js && node test/test-billing.js && node test/test-ai-engine.js",
+    "test": "node test/test-backend.js && node test/test-compiler.js && node test/test-deployer.js && node test/test-billing.js && node test/test-ai-engine.js && node test/test-vision-cloud.js",
     "test:backend": "node test/test-backend.js",
     "test:compiler": "node test/test-compiler.js",
     "test:deployer": "node test/test-deployer.js",
     "test:db": "node test/test-db-auth.js",
+    "test:mobile": "node test/test-db-mobile.js",
     "test:billing": "node test/test-billing.js",
-    "test:ai": "node test/test-ai-engine.js"
+    "test:ai": "node test/test-ai-engine.js",
+    "test:vision": "node test/test-vision-cloud.js",
+    "test:community": "node test/test-community.js"
   },
   "dependencies": {
     "adm-zip": "^0.6.0",
