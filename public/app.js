@@ -1671,7 +1671,7 @@
         state.user = data.user;
         renderUserProfile();
         closePricingModal();
-        showToast(`🎉 ${data.user.plan} paketine başarıyla geçildi! Günlük ${data.user.credits} Kredi (${Math.floor(data.user.credits/50)} Site Analiz Hakkı) Tanımlandı.`);
+        showToast(`🎉 ${data.user.plan} paketine başarıyla geçildi! Günlük ${data.user.credits} Kredi (${Math.floor(data.user.credits/10)} Site Analiz Hakkı) Tanımlandı.`);
       }
     } catch (err) {
       showToast(err.message, 'error');
@@ -1811,8 +1811,8 @@
   async function triggerAnalysis(mode) {
     if (state.isAnalyzing) return;
 
-    if (state.user.credits < 50) {
-      showToast(`⚠️ Krediniz yetersiz! Kalan: ${state.user.credits} Kredi / Gereken: 50 Kredi. Devam etmek için lütfen paketinizi yükseltin.`, 'error');
+    if (state.user.credits < 10) {
+      showToast(`⚠️ Krediniz yetersiz! Kalan: ${state.user.credits} Kredi / Gereken: 10 Kredi. Devam etmek için lütfen paketinizi yükseltin.`, 'error');
       openPricingModal();
       return;
     }
