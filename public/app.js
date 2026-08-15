@@ -931,6 +931,74 @@
     showToast(`Loaded project: ${project.title}`);
   }
 
+  /* ═══════════════════ MULTI-PAGE NAVIGATOR & ROUTING ═══════════════════ */
+  function bindMultiPageRouteEvents() {
+    document.querySelectorAll('.page-route-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.page-route-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const path = tab.dataset.path || '/';
+        state.currentRoute = path;
+        showToast(`Navigated to route: ${path}`);
+      });
+    });
+  }
+
+  function promptAddCustomRoute() {
+    const route = prompt('Enter custom subpage route (e.g. /pricing, /about, /blog):', '/');
+    if (route && route.trim()) {
+      const cleanRoute = route.trim().startsWith('/') ? route.trim() : '/' + route.trim();
+      if (!state.crawledPages.some(p => p.path === cleanRoute)) {
+        state.crawledPages.push({
+          id: `page_${Date.now()}`,
+          path: cleanRoute,
+          name: cleanRoute,
+          title: cleanRoute,
+          code: ''
+        });
+        renderMultiPageTabs();
+        showToast(`Added route: ${cleanRoute}`);
+      }
+    }
+  }
+
+  function renderMultiPageTabs() {
+    if (!el.pageTabsContainer) return;
+    el.pageTabsContainer.innerHTML = state.crawledPages.map(page => `
+      <button class="page-route-tab ${state.currentRoute === page.path ? 'active' : ''}" data-path="${page.path}">
+        <i class="fa-solid fa-file-code"></i>
+        <span class="route-name">${escapeHtml(page.name || page.path)}</span>
+      </button>
+    `).join('');
+    bindMultiPageRouteEvents();
+  }
+
+  async function triggerMultiPageCrawl() {
+    const rootUrl = el.targetUrlInput?.value || 'https://example.com';
+    showToast(`Deep crawling subpages for ${rootUrl}...`, 'info');
+    try {
+      const res = await fetch('/api/crawl-multi-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rootUrl, maxPages: 4 })
+      });
+      const data = await res.json();
+      if (data.success && data.siteMap) {
+        state.crawledPages = data.siteMap.map((s, idx) => ({
+          id: `page_${idx}`,
+          path: s.path,
+          name: s.title || s.path,
+          title: s.title || s.path,
+          code: ''
+        }));
+        renderMultiPageTabs();
+        showToast(`Discovered & crawled ${data.siteMap.length} subpages!`);
+      }
+    } catch (err) {
+      showToast(`Crawl error: ${err.message}`, 'error');
+    }
+  }
+
   async function saveCurrentProject() {
     const title = el.resSiteTitle?.textContent || 'Untitled Site Clone';
     const url = el.resSiteUrl?.textContent || el.targetUrlInput?.value || 'https://example.com';
