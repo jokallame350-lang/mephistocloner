@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SitePrompter AI Studio — Production SaaS Frontend & Live Code Synthesis Engine</title>
+  <meta name="description" content="Production-grade AI Frontend Studio: Reverse-engineer any website into live streaming React 19, Next.js 15, Tailwind CSS code with side-by-side sandbox, multi-page crawling, and 1-click GitHub & Vercel deployment.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css?v=2.5.1">
+</head>
+<body>
+  <!-- Ambient background glow effects -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+  <div class="grid-overlay"></div>
+
+  <div id="app" class="app-container">
+    
+    <!-- ═══════════════════ PRODUCTION HEADER ═══════════════════ -->
+    <header class="site-header glass-card">
+      <div class="header-inner">
+        
+        <!-- Left: Brand & Workspace Switcher -->
+        <div class="header-left">
+          <div class="logo-area" id="logoHomeBtn" title="SitePrompter AI Home">
+            <div class="logo-icon-wrap">
+              <i class="fa-solid fa-bolt-lightning logo-icon"></i>
+              <div class="logo-pulse"></div>
+            </div>
+            <div class="logo-text-group">
+              <div class="brand-title">
+                <span class="brand-name">SitePrompter</span>
+                <span class="brand-badge">SaaS Studio v2.5</span>
+              </div>
+              <span class="brand-subtitle">Visual DNA & AI Code Synthesis Engine</span>
+            </div>
+          </div>
+
+          <!-- Workspace Switcher -->
+          <div class="workspace-switcher-wrap" id="workspaceSwitcherWrap">
+            <button class="workspace-btn" id="workspaceDropdownBtn" title="Switch Workspace">
+              <i class="fa-solid fa-layer-group text-primary"></i>
+              <span class="ws-label" id="currentWorkspaceName">Default Workspace</span>
+              <i class="fa-solid fa-chevron-down ws-arrow"></i>
+            </button>
+            <div class="workspace-dropdown glass-card" id="workspaceDropdown" style="display: none;">
+              <div class="ws-dropdown-header">
+                <span>Workspaces</span>
+                <button class="mini-btn-xs" id="btnAddWorkspace"><i class="fa-solid fa-plus"></i> New</button>
+              </div>
+              <div class="ws-list" id="workspaceList">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: Engine Status & Active Model Badge -->
+        <div class="header-center">
+          <div class="engine-status-pill" id="engineStatusPill" title="Telemetry & AI Engine Status">
+            <span class="status-dot pulse-green"></span>
+            <span class="status-text" id="engineStatusText">AI Engine Ready</span>
+          </div>
+          <div class="model-badge-pill" id="activeModelBadge" title="Current Selected AI Model">
+            <i class="fa-solid fa-brain text-purple"></i>
+            <span id="headerActiveModelName">Claude 3.7 Sonnet</span>
+          </div>
+        </div>
+
+        <!-- Right: Actions, Credits, BYOK, Pricing, User Profile -->
+        <div class="header-actions">
+          
+          <!-- BYOK Key Manager Trigger -->
+          <button class="header-btn byok-btn" id="btnOpenByokModal" title="Configure Custom API Keys (BYOK)">
+            <i class="fa-solid fa-key"></i>
+            <span class="btn-label">BYOK Keys</span>
+            <span class="byok-indicator-dot" id="byokConfiguredDot" style="display: none;"></span>
+          </button>
+
+          <!-- Pricing / Upgrade Trigger -->
+          <button class="header-btn upgrade-glow-btn" id="btnOpenPricingModal" title="Upgrade Plan & Add Credits">
+            <i class="fa-solid fa-crown text-amber"></i>
+            <span class="btn-label">Upgrade / Pro</span>
+          </button>
+
+          <!-- User Credits Pill -->
+          <div class="credits-meter-pill" id="creditsMeterPill" title="Remaining Generation Credits (Click to top up)">
+            <i class="fa-solid fa-coins text-amber animate-spin-slow"></i>
+            <span class="credits-count" id="userCreditsDisplay">480</span>
+            <span class="credits-label">Credits</span>
+          </div>
+
+          <!-- Project Library / History Drawer Trigger -->
+          <button class="header-btn" id="historyModalBtn" title="Saved Projects & History">
+            <i class="fa-solid fa-folder-open"></i>
+            <span class="btn-label">Projects</span>
+            <span class="badge-count" id="historyCount">2</span>
+          </button>
+
+          <!-- 1-Click Deploy Trigger (Header) -->
+          <button class="header-btn deploy-primary-btn" id="btnHeaderDeploy" title="1-Click Deploy to GitHub & Vercel">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span class="btn-label">1-Click Deploy</span>
+          </button>
+
+          <!-- User Profile Badge & Menu -->
+          <div class="user-profile-wrap" id="userProfileWrap">
+            <button class="user-profile-btn" id="userProfileBtn">
+              <img id="userAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="user-avatar">
+              <div class="user-meta-group">
+                <span class="user-name" id="userNameDisplay">Alex Rivera</span>
+                <span class="user-plan-badge" id="userPlanBadge">Pro Developer</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Live Clone Demo (Port 3001) -->
+          <a href="http://localhost:3001" target="_blank" class="header-btn demo-btn" title="View DarthKubo Kick Clone Demo (Port 3001)">
+            <i class="fa-solid fa-tv text-emerald"></i>
+            <span class="btn-label">Demo (3001)</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════ HERO BANNER & MISSION ═══════════════════ -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-tag">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Full-Stack UI Reverse Engineering, Streaming Code Synthesis & Instant Edge Deploy</span>
+      </div>
+      <h1 class="hero-title">
+        Extract Any Website's <span class="gradient-text">Design DNA</span> & Stream Live Production Code
+      </h1>
+      <p class="hero-desc">
+        Reverse-engineer live websites with pixel precision. Generates React 19, Next.js 15, Tailwind CSS, design tokens, multi-page routing, and side-by-side interactive sandbox preview with 1-click GitHub and Vercel edge deployment.
+      </p>
+    </section>
+
+    <!-- ═══════════════════ MAIN INPUT & SYNTHESIS CONTROLS ═══════════════════ -->
+    <main class="main-content">
+      <div class="glass-card input-card" id="inputCard">
+        
+        <!-- Mode Tabs: URL Analyzer vs Direct HTML/CSS Paste -->
+        <div class="mode-tabs-wrapper">
+          <div class="mode-tabs" role="tablist">
+            <button class="mode-tab active" id="tabModeUrl" data-mode="url" role="tab" aria-selected="true">
+              <i class="fa-solid fa-globe"></i>
+              <span>Live Website Analyzer</span>
+              <span class="tab-badge">Headless Chrome Engine</span>
+            </button>
+            <button class="mode-tab" id="tabModeRaw" data-mode="raw" role="tab" aria-selected="false">
+              <i class="fa-solid fa-code"></i>
+              <span>Direct HTML / CSS Paste</span>
+              <span class="tab-badge">Offline Ready</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- URL Input View Panel -->
+        <div class="input-view-panel" id="panelUrlView">
+          <div class="url-input-container">
+            <div class="input-icon-wrap">
+              <i class="fa-solid fa-link input-icon"></i>
+            </div>
+            <input 
+              type="url" 
+              id="targetUrlInput" 
+              class="target-url-input" 
+              placeholder="https://example.com or enter any live URL..."
+              value="https://kick.com/darthkubo"
+              autocomplete="off"
+            />
+            <div class="input-actions-wrap">
+              <button class="clear-input-btn" id="clearUrlBtn" title="Clear input" style="display: inline-flex;">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+              <button class="btn-primary analyze-btn" id="analyzeUrlBtn">
+                <span class="btn-content">
+                  <i class="fa-solid fa-bolt btn-icon"></i>
+                  <span class="btn-text">Analyze & Stream Studio</span>
+                </span>
+                <div class="btn-glow"></div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Presets Row -->
+          <div class="presets-row">
+            <span class="presets-label"><i class="fa-solid fa-sparkles"></i> Live Presets:</span>
+            <div class="presets-list">
+              <button class="preset-pill" data-url="https://kick.com/darthkubo">
+                <i class="fa-solid fa-tv text-emerald"></i> Kick Stream (DarthKubo)
+              </button>
+              <button class="preset-pill" data-url="https://linear.app">
+                <i class="fa-solid fa-layer-group text-indigo-400"></i> Linear App
+              </button>
+              <button class="preset-pill" data-url="https://stripe.com">
+                <i class="fa-solid fa-credit-card text-purple-400"></i> Stripe
+              </button>
+              <button class="preset-pill" data-url="https://github.com">
+                <i class="fa-brands fa-github"></i> GitHub
+              </button>
+              <button class="preset-pill" data-url="https://tailwindui.com">
+                <i class="fa-solid fa-wind text-cyan-400"></i> Tailwind UI
+              </button>
+              <button class="preset-pill" data-url="https://vercel.com">
+                <i class="fa-solid fa-triangle text-slate-300"></i> Vercel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Raw HTML/CSS View Panel -->
+        <div class="input-view-panel" id="panelRawView" style="display: none;">
+          <div class="raw-inputs-grid">
+            <div class="raw-input-group">
+              <div class="raw-header">
+                <label for="rawHtmlInput"><i class="fa-brands fa-html5"></i> Raw HTML Markup</label>
+                <button class="mini-btn" id="pasteHtmlSampleBtn">Load Starter Sample</button>
+              </div>
+              <textarea 
+                id="rawHtmlInput" 
+                class="raw-textarea" 
+                placeholder="Paste <!DOCTYPE html> or <div>...</div> code here..."
+                spellcheck="false"
+              ></textarea>
+            </div>
+
+            <div class="raw-input-group">
+              <div class="raw-header">
+                <label for="rawCssInput"><i class="fa-brands fa-css3-alt"></i> Custom CSS (Optional)</label>
+                <button class="mini-btn" id="clearRawBtn">Clear</button>
+              </div>
+              <textarea 
+                id="rawCssInput" 
+                class="raw-textarea" 
+                placeholder="/* Paste stylesheets or :root variables here */"
+                spellcheck="false"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="raw-actions-bar">
+            <button class="btn-primary analyze-btn" id="analyzeRawBtn">
+              <span class="btn-content">
+                <i class="fa-solid fa-wand-magic-sparkles btn-icon"></i>
+                <span class="btn-text">Parse & Synthesize Studio</span>
+              </span>
+              <div class="btn-glow"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Configuration & Controls Grid -->
+        <div class="controls-row">
+          
+          <!-- AI Model Selector -->
+          <div class="control-item">
+            <label for="aiModelSelect" class="control-label">
+              <i class="fa-solid fa-brain text-purple"></i> AI Streaming Model
+            </label>
+            <div class="custom-select-wrap">
+              <select id="aiModelSelect" class="control-select">
+                <option value="claude-3-7-sonnet" selected>🟣 Claude 3.7 Sonnet (Hybrid Reasoning)</option>
+                <option value="gpt-4o">🟢 GPT-4o (OpenAI Omnipresent)</option>
+                <option value="deepseek-v3">🔵 DeepSeek V3 (High-Speed Code)</option>
+                <option value="gemini-2-5-pro">🟠 Gemini 2.5 Pro (Google Multimodal)</option>
+                <option value="local-fast">⚡ Local Fast Engine (Zero-Latency)</option>
+              </select>
+              <i class="fa-solid fa-chevron-down select-arrow"></i>
+            </div>
+          </div>
+
+          <!-- Target Framework -->
+          <div class="control-item">
+            <label for="frameworkSelect" class="control-label">
+              <i class="fa-solid fa-layer-group text-primary"></i> Target Framework
+            </label>
+            <div class="custom-select-wrap">
+              <select id="frameworkSelect" class="control-select">
+                <option value="react-tailwind" selected>React 19 + Tailwind CSS + Lucide (Vite / Next.js)</option>
+                <option value="nextjs-shadcn">Next.js 15 (App Router) + Shadcn UI + Tailwind</option>
+                <option value="vanilla-html">Vanilla HTML5 + Modern CSS (Single File)</option>
+                <option value="vue-tailwind">Vue 3 (SFC Composition API) + Tailwind CSS</option>
+                <option value="svelte-tailwind">Svelte 5 (Runes) + Tailwind CSS</option>
+              </select>
+              <i class="fa-solid fa-chevron-down select-arrow"></i>
+            </div>
+          </div>
+
+          <!-- Detail & Fidelity -->
+          <div class="control-item">
+            <label for="detailLevelSelect" class="control-label">
+              <i class="fa-solid fa-sliders text-cyan"></i> Synthesis Fidelity
+            </label>
+            <div class="custom-select-wrap">
+              <select id="detailLevelSelect" class="control-select">
+                <option value="balanced" selected>Balanced (~6k Tokens) — Production Ready</option>
+                <option value="compact">Compact (~2.5k Tokens) — Fast Overview</option>
+                <option value="exhaustive">Exhaustive (Pixel-Perfect 10k+ Tokens)</option>
+              </select>
+              <i class="fa-solid fa-chevron-down select-arrow"></i>
+            </div>
+          </div>
+
+          <!-- Asset Handling Mode -->
+          <div class="control-item">
+            <label for="assetModeSelect" class="control-label">
+              <i class="fa-solid fa-images text-emerald"></i> Asset Handling
+            </label>
+            <div class="custom-select-wrap">
+              <select id="assetModeSelect" class="control-select">
+                <option value="original-urls" selected>Original URLs (Keep exact media)</option>
+                <option value="placeholders">Smart Placeholders (placehold.co)</option>
+                <option value="svg-inline">Inline SVG / Vector Icons</option>
+              </select>
+              <i class="fa-solid fa-chevron-down select-arrow"></i>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Multi-Page Crawler Checkbox Option -->
+        <div class="crawler-option-strip">
+          <label class="checkbox-container">
+            <input type="checkbox" id="enableMultiPageCrawl" checked>
+            <span class="custom-checkbox"></span>
+            <span class="checkbox-text">
+              <i class="fa-solid fa-diagram-project text-indigo-400"></i>
+              <strong>Enable Multi-Page Auto-Crawler</strong> (Auto-discovers and extracts <code>/</code>, <code>/pricing</code>, <code>/login</code>, <code>/dashboard</code>)
+            </span>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════ TELEMETRY PIPELINE PROGRESS TRACKER ═══════════════════ -->
+      <div class="glass-card pipeline-card" id="pipelineCard" style="display: none;">
+        <div class="pipeline-header">
+          <div class="pipeline-title-group">
+            <div class="spinner-orbit"></div>
+            <div>
+              <h3 class="pipeline-title" id="pipelineStatusTitle">Analyzing Target Website...</h3>
+              <p class="pipeline-target" id="pipelineTargetUrl">https://kick.com/darthkubo</p>
+            </div>
+          </div>
+          <div class="pipeline-time" id="pipelineTimer">0.0s</div>
+        </div>
+
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+        </div>
+
+        <div class="pipeline-steps-grid">
+          <div class="pipeline-step" id="step-1" data-step="1">
+            <div class="step-icon-wrap"><i class="fa-solid fa-satellite-dish"></i></div>
+            <div class="step-info">
+              <span class="step-name">1. Fetching URL</span>
+              <span class="step-status">Pending</span>
+            </div>
+          </div>
+          <div class="pipeline-step" id="step-2" data-step="2">
+            <div class="step-icon-wrap"><i class="fa-solid fa-laptop-code"></i></div>
+            <div class="step-info">
+              <span class="step-name">2. DOM & CSSOM</span>
+              <span class="step-status">Waiting</span>
+            </div>
+          </div>
+          <div class="pipeline-step" id="step-3" data-step="3">
+            <div class="step-icon-wrap"><i class="fa-solid fa-palette"></i></div>
+            <div class="step-info">
+              <span class="step-name">3. Styles & Tokens</span>
+              <span class="step-status">Waiting</span>
+            </div>
+          </div>
+          <div class="pipeline-step" id="step-4" data-step="4">
+            <div class="step-icon-wrap"><i class="fa-solid fa-puzzle-piece"></i></div>
+            <div class="step-info">
+              <span class="step-name">4. Components</span>
+              <span class="step-status">Waiting</span>
+            </div>
+          </div>
+          <div class="pipeline-step" id="step-5" data-step="5">
+            <div class="step-icon-wrap"><i class="fa-solid fa-brain"></i></div>
+            <div class="step-info">
+              <span class="step-name">5. AI Stream Synthesis</span>
+              <span class="step-status">Waiting</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ PRODUCTION RESULTS DASHBOARD ═══════════════════ -->
+      <div class="results-dashboard" id="resultsDashboard" style="display: none;">
+        
+        <!-- Summary Metric Header Banner -->
+        <div class="glass-card summary-banner">
+          <div class="summary-banner-left">
+            <div class="target-site-badge">
+              <div class="site-favicon-wrap" id="siteFaviconWrap">
+                <i class="fa-solid fa-globe site-default-icon"></i>
+                <img id="siteFavicon" src="" class="site-favicon" alt="favicon" style="display: none;">
+              </div>
+              <div class="target-site-meta">
+                <div class="site-title-row">
+                  <span class="target-site-title" id="resSiteTitle">Site Title</span>
+                  <button class="star-fav-btn" id="btnToggleProjectFav" title="Add to Favorites">
+                    <i class="fa-regular fa-star" id="favStarIcon"></i>
+                  </button>
+                </div>
+                <span class="target-site-url" id="resSiteUrl">https://example.com</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Metrics Grid -->
+          <div class="summary-metrics-grid">
+            <div class="metric-card">
+              <div class="metric-val" id="metricTokens">~5,420</div>
+              <div class="metric-label"><i class="fa-solid fa-coins"></i> Est. Tokens</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="metricColors">24</div>
+              <div class="metric-label"><i class="fa-solid fa-palette"></i> Colors</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="metricFonts">3</div>
+              <div class="metric-label"><i class="fa-solid fa-font"></i> Typefaces</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="metricComponents">18</div>
+              <div class="metric-label"><i class="fa-solid fa-cubes"></i> Components</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-val" id="metricFramework">React, Tailwind</div>
+              <div class="metric-label"><i class="fa-solid fa-bolt"></i> Framework</div>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons in Banner -->
+          <div class="summary-banner-actions">
+            <button class="btn-action btn-save-proj" id="btnSaveCurrentProject" title="Save Project to Workspace">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Save Project</span>
+            </button>
+            <button class="btn-action btn-deploy-glow" id="btnDeployTrigger" title="1-Click Deploy to GitHub & Vercel">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>1-Click Deploy</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ════════════ MULTI-PAGE NAVIGATOR BAR ════════════ -->
+        <div class="glass-card multi-page-navigator" id="multiPageNavigator">
+          <div class="multi-page-left">
+            <span class="multi-page-label"><i class="fa-solid fa-sitemap text-indigo-400"></i> Multi-Page Routes:</span>
+            <div class="page-tabs-container" id="pageTabsContainer">
+              <button class="page-route-tab active" data-path="/">
+                <i class="fa-solid fa-house"></i>
+                <span class="route-name">/ (Home)</span>
+                <span class="route-status-dot"></span>
+              </button>
+              <button class="page-route-tab" data-path="/pricing">
+                <i class="fa-solid fa-tags"></i>
+                <span class="route-name">/pricing</span>
+              </button>
+              <button class="page-route-tab" data-path="/login">
+                <i class="fa-solid fa-key"></i>
+                <span class="route-name">/login</span>
+              </button>
+              <button class="page-route-tab" data-path="/dashboard">
+                <i class="fa-solid fa-chart-line"></i>
+                <span class="route-name">/dashboard</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="multi-page-right">
+            <button class="mini-btn" id="btnAddCustomRoute"><i class="fa-solid fa-plus"></i> Add Route</button>
+            <button class="mini-btn primary" id="btnDeepCrawlAll"><i class="fa-solid fa-spider"></i> Deep Crawl All</button>
+          </div>
+        </div>
+
+        <!-- ════════════ MAIN STUDIO TABBED NAVIGATION ════════════ -->
+        <div class="dashboard-tabs-container">
+          <nav class="dashboard-nav-tabs" role="tablist">
+            
+            <button class="nav-tab active" data-target="tabStudio" role="tab" aria-selected="true">
+              <i class="fa-solid fa-code-compare tab-icon text-indigo-400"></i>
+              <span>Live Code & Sandbox Studio</span>
+              <span class="tab-pill-badge primary-badge">Split View</span>
+            </button>
+
+            <button class="nav-tab" data-target="tabPrompt" role="tab" aria-selected="false">
+              <i class="fa-solid fa-robot tab-icon text-purple"></i>
+              <span>AI Prompt Studio</span>
+              <span class="tab-pill-badge">Master Prompt</span>
+            </button>
+
+            <button class="nav-tab" data-target="tabDesignSystem" role="tab" aria-selected="false">
+              <i class="fa-solid fa-swatchbook tab-icon text-cyan"></i>
+              <span>Design System Exporter</span>
+              <span class="tab-pill-badge" id="designSystemCount">Tokens & Config</span>
+            </button>
+
+            <button class="nav-tab" data-target="tabComponentSlicer" role="tab" aria-selected="false">
+              <i class="fa-solid fa-scissors tab-icon text-pink-400"></i>
+              <span>Component Slicer</span>
+              <span class="tab-pill-badge">Focus Mode</span>
+            </button>
+
+            <button class="nav-tab" data-target="tabComponents" role="tab" aria-selected="false">
+              <i class="fa-solid fa-shapes tab-icon text-emerald"></i>
+              <span>Components & UI</span>
+              <span class="tab-pill-badge" id="componentsCount">0</span>
+            </button>
+
+            <button class="nav-tab" data-target="tabAssets" role="tab" aria-selected="false">
+              <i class="fa-solid fa-images tab-icon text-amber"></i>
+              <span>Assets & Media</span>
+              <span class="tab-pill-badge" id="assetsCount">0</span>
+            </button>
+
+            <button class="nav-tab" data-target="tabRawDom" role="tab" aria-selected="false">
+              <i class="fa-solid fa-code-merge tab-icon text-slate-400"></i>
+              <span>DOM & CSS Rules</span>
+              <span class="tab-pill-badge">Inspector</span>
+            </button>
+
+          </nav>
+
+          <!-- ════════════════════════════════════════════════════════════════
+               TAB 1: LIVE CODE & SANDBOX STUDIO (SPLIT-VIEW)
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="tab-panel active" id="tabStudio">
+            <div class="split-studio-container">
+              
+              <!-- ─── AI STREAMING VISUALIZER STRIP ─── -->
+              <div class="streaming-visualizer-bar" id="streamingVisualizerBar">
+                <div class="streaming-status-group">
+                  <span class="pulse-indicator-dot active" id="streamPulseDot"></span>
+                  <span class="streaming-status-label" id="streamStatusLabel">Streaming AI Code Synthesis...</span>
+                  <span class="model-tag" id="streamModelTag">Claude 3.7 Sonnet</span>
+                </div>
+                <div class="streaming-metrics-group">
+                  <div class="stream-metric"><i class="fa-solid fa-bolt text-amber"></i> <span id="streamSpeed">64</span> tok/s</div>
+                  <div class="stream-metric"><i class="fa-solid fa-microchip text-purple"></i> <span id="streamTokensCount">1,840</span> tokens</div>
+                  <div class="stream-metric"><i class="fa-solid fa-stopwatch text-cyan"></i> <span id="streamElapsed">1.4s</span></div>
+                  <button class="mini-btn-xs danger" id="btnStopStreaming" title="Stop Generation" style="display: none;">
+                    <i class="fa-solid fa-stop"></i> Stop
+                  </button>
+                  <button class="mini-btn-xs primary" id="btnReStreamCode" title="Re-synthesize Code">
+                    <i class="fa-solid fa-rotate-right"></i> Re-stream
+                  </button>
+                </div>
+              </div>
+
+              <!-- ─── SPLIT VIEW PANES (CODE EDITOR & LIVE SANDBOX) ─── -->
+              <div class="studio-panes-grid">
+                
+                <!-- LEFT PANE: LIVE CODE EDITOR -->
+                <div class="glass-card studio-pane editor-pane">
+                  <div class="pane-toolbar">
+                    <div class="toolbar-file-info">
+                      <i class="fa-solid fa-file-code text-indigo-400"></i>
+                      <span class="file-name" id="editorFileName">App.jsx</span>
+                      <span class="badge-framework" id="editorFrameworkBadge">React 19 + Tailwind</span>
+                      <span class="live-sync-badge"><i class="fa-solid fa-rotate"></i> Live Sync</span>
+                    </div>
+
+                    <div class="toolbar-editor-actions">
+                      <button class="mini-btn" id="btnFormatCode" title="Format Code"><i class="fa-solid fa-align-left"></i> Format</button>
+                      <button class="mini-btn" id="btnCopyLiveCode" title="Copy Code"><i class="fa-regular fa-copy"></i> Copy</button>
+                      <button class="mini-btn" id="btnDownloadCodeFile" title="Download File"><i class="fa-solid fa-download"></i> Save</button>
+                      <button class="mini-btn" id="btnDownloadStudioZip" title="Download Full Project ZIP"><i class="fa-solid fa-file-zipper"></i> ZIP</button>
+                    </div>
+                  </div>
+
+                  <!-- Editor Canvas -->
+                  <div class="code-editor-canvas-wrap" id="codeEditorCanvasWrap">
+                    <div class="code-editor-gutter" id="liveEditorGutter"></div>
+                    <textarea 
+                      id="liveCodeEditor" 
+                      class="live-code-textarea" 
+                      spellcheck="false"
+                      placeholder="// AI generated code will stream here in real-time..."
+                    ></textarea>
+                  </div>
+
+                  <!-- AI Interactive Refinement Bar (Directly Below Editor) -->
+                  <div class="ai-refinement-dock">
+                    
+                    <!-- Quick Preset Action Chips -->
+                    <div class="refinement-chips-scroll">
+                      <span class="chips-label"><i class="fa-solid fa-sparkles text-purple"></i> Quick Refine:</span>
+                      <button class="refine-chip" data-refine="Add smooth dark/light mode toggle with theme switcher icon in header">
+                        <i class="fa-solid fa-moon"></i> Dark Mode Toggle
+                      </button>
+                      <button class="refine-chip" data-refine="Convert color theme to vibrant Neon Emerald and Cyberpunk Dark">
+                        <i class="fa-solid fa-palette text-emerald"></i> Emerald Theme
+                      </button>
+                      <button class="refine-chip" data-refine="Add Framer Motion smooth entrance animations and scroll reveal effects">
+                        <i class="fa-solid fa-film text-pink-400"></i> Framer Motion
+                      </button>
+                      <button class="refine-chip" data-refine="Add full mobile responsive drawer navigation and collapsible menu">
+                        <i class="fa-solid fa-mobile-screen text-cyan"></i> Mobile Drawer
+                      </button>
+                      <button class="refine-chip" data-refine="Add interactive pricing toggle between Monthly and Yearly billing">
+                        <i class="fa-solid fa-tags text-amber"></i> Pricing Toggle
+                      </button>
+                    </div>
+
+                    <!-- AI Chat / Instruction Prompt Input -->
+                    <div class="refinement-chat-form">
+                      <div class="refinement-input-wrap">
+                        <i class="fa-solid fa-wand-magic-sparkles text-purple"></i>
+                        <input 
+                          type="text" 
+                          id="studioRefineInput" 
+                          class="refine-chat-input" 
+                          placeholder="Describe changes or refinements (e.g. 'Add a pricing calculator modal', 'Make hero full-screen with video backdrop')..."
+                        />
+                        <button class="btn-primary btn-stream-refine" id="btnStreamRefine">
+                          <i class="fa-solid fa-sparkles"></i>
+                          <span>Stream AI Refine</span>
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- RIGHT PANE: INTERACTIVE LIVE SANDBOX -->
+                <div class="glass-card studio-pane sandbox-pane">
+                  <div class="pane-toolbar">
+                    
+                    <!-- Viewport Device Switcher -->
+                    <div class="device-switch-group">
+                      <button class="device-btn active" data-width="100%" title="Desktop View (100% / 1440px)">
+                        <i class="fa-solid fa-desktop"></i>
+                        <span>Desktop</span>
+                      </button>
+                      <button class="device-btn" data-width="1024px" title="Laptop View (1024px)">
+                        <i class="fa-solid fa-laptop"></i>
+                        <span>Laptop</span>
+                      </button>
+                      <button class="device-btn" data-width="768px" title="Tablet View (768px)">
+                        <i class="fa-solid fa-tablet-screen-button"></i>
+                        <span>Tablet</span>
+                      </button>
+                      <button class="device-btn" data-width="375px" title="Mobile View (375px)">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                        <span>Mobile</span>
+                      </button>
+                    </div>
+
+                    <div class="sandbox-toolbar-actions">
+                      <button class="mini-btn" id="btnToggleConsoleLogs" title="Toggle Console Output">
+                        <i class="fa-solid fa-terminal"></i> Console
+                      </button>
+                      <button class="mini-btn" id="btnReloadStudioSandbox" title="Refresh Live Preview">
+                        <i class="fa-solid fa-rotate-right"></i>
+                      </button>
+                      <button class="mini-btn primary" id="btnOpenDedicatedTab" title="Open Fullpage Sandbox in New Tab">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Tab
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Sandbox Frame Container -->
+                  <div class="sandbox-stage-wrap">
+                    <div class="sandbox-frame-container" id="studioSandboxContainer" style="width: 100%;">
+                      <iframe 
+                        id="studioSandboxIframe" 
+                        class="studio-sandbox-iframe" 
+                        sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
+                      ></iframe>
+                    </div>
+                  </div>
+
+                  <!-- Live Console Output Drawer (Collapsible) -->
+                  <div class="sandbox-console-drawer" id="sandboxConsoleDrawer" style="display: none;">
+                    <div class="console-header">
+                      <span><i class="fa-solid fa-terminal text-emerald"></i> Sandbox Console Stream</span>
+                      <button class="mini-btn-xs" id="btnClearConsole">Clear</button>
+                    </div>
+                    <div class="console-body" id="sandboxConsoleLogs">
+                      <div class="console-line text-emerald">✔ Live Sandbox environment initialized (Tailwind CDN & Lucide Icons ready)</div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ════════════════════════════════════════════════════════════════
+               TAB 2: AI PROMPT STUDIO (MASTER PROMPT COMPILER)
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="tab-panel" id="tabPrompt">
+            <div class="glass-card prompt-studio-card">
+              
+              <!-- Fast Framework Recompiler Bar -->
+              <div class="recompiler-toolbar">
+                <div class="toolbar-left">
+                  <span class="recompile-label"><i class="fa-solid fa-repeat"></i> Instant Framework Switch:</span>
+                  <div class="framework-pills" id="frameworkPills">
+                    <button class="f-pill active" data-fw="react-tailwind">React + Tailwind</button>
+                    <button class="f-pill" data-fw="nextjs-shadcn">Next.js + Shadcn</button>
+                    <button class="f-pill" data-fw="vanilla-html">Vanilla HTML</button>
+                    <button class="f-pill" data-fw="vue-tailwind">Vue 3 SFC</button>
+                    <button class="f-pill" data-fw="svelte-tailwind">Svelte 5</button>
+                  </div>
+                </div>
+
+                <div class="toolbar-right">
+                  <div class="telemetry-badges">
+                    <span class="telemetry-badge" id="promptTokenCount"><i class="fa-solid fa-microchip"></i> ~5,200 tokens</span>
+                    <span class="telemetry-badge" id="promptLineCount"><i class="fa-solid fa-bars-staggered"></i> 245 lines</span>
+                    <span class="telemetry-badge" id="promptWordCount"><i class="fa-solid fa-file-word"></i> 1,890 words</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AI Custom Refinement Bar -->
+              <div class="refinement-bar">
+                <div class="refinement-input-wrap">
+                  <i class="fa-solid fa-wand-magic-sparkles text-purple"></i>
+                  <input 
+                    type="text" 
+                    id="customRefineInput" 
+                    class="refinement-input" 
+                    placeholder="Refine prompt (e.g. 'Add dark/light theme switcher', 'Make it a SaaS landing page', 'Translate to Turkish')..."
+                  />
+                  <button class="btn-refine" id="btnApplyRefinement">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <span>Refine Prompt</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Action Bar -->
+              <div class="prompt-action-bar">
+                <div class="action-btn-group">
+                  <button class="btn-action btn-copy-glow" id="btnCopyPrompt" title="Copy full prompt to clipboard">
+                    <i class="fa-regular fa-clone"></i>
+                    <span>Copy Prompt</span>
+                  </button>
+                  <button class="btn-action btn-zip" id="btnDownloadZip" title="Download Complete Vite + React 19 + Tailwind Project (.ZIP)">
+                    <i class="fa-solid fa-file-zipper"></i>
+                    <span>Download Project (.ZIP)</span>
+                  </button>
+                  <button class="btn-action" id="btnDownloadMd" title="Download formatted markdown file">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download .md</span>
+                  </button>
+                  <button class="btn-action" id="btnDownloadTxt" title="Download raw text file">
+                    <i class="fa-regular fa-file-lines"></i>
+                    <span>.txt</span>
+                  </button>
+                  <button class="btn-action" id="btnToggleEdit" title="Toggle inline editor mode">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Edit</span>
+                  </button>
+                </div>
+
+                <div class="action-btn-group ai-launchers">
+                  <button class="btn-action ai-btn chatgpt-btn" id="btnLaunchChatGPT" title="Open prompt directly in ChatGPT">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    <span>ChatGPT</span>
+                  </button>
+                  <button class="btn-action ai-btn claude-btn" id="btnLaunchClaude" title="Open prompt directly in Claude">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    <span>Claude</span>
+                  </button>
+                  <button class="btn-action icon-only" id="btnFullscreenPrompt" title="Fullscreen view">
+                    <i class="fa-solid fa-expand"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Prompt Editor / Viewer Canvas -->
+              <div class="prompt-viewer-wrapper" id="promptViewerWrapper">
+                <div class="editor-gutter" id="editorGutter"></div>
+                <textarea 
+                  id="promptEditor" 
+                  class="prompt-textarea" 
+                  readonly 
+                  spellcheck="false"
+                ></textarea>
+              </div>
+
+              <!-- Prompt Footer Hints -->
+              <div class="prompt-footer-hints">
+                <div class="hint-item">
+                  <i class="fa-solid fa-lightbulb text-amber"></i>
+                  <span><strong>Cursor / Claude 3.7 Tip:</strong> Paste directly into Cursor Composer (<kbd>Ctrl</kbd>+<kbd>I</kbd>) or Claude 3.7 Projects for instant zero-shot reproduction.</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ════════════════════════════════════════════════════════════════
+               TAB 3: DESIGN SYSTEM EXPORTER
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="tab-panel" id="tabDesignSystem">
+            <div class="ds-exporter-container space-y-6">
+              
+              <!-- Top Quick Action Cards -->
+              <div class="ds-export-cards-grid">
+                
+                <!-- Tailwind Config Card -->
+                <div class="glass-card ds-export-card">
+                  <div class="ds-card-header">
+                    <div class="ds-card-title-group">
+                      <i class="fa-solid fa-wind text-cyan"></i>
+                      <div>
+                        <h4>tailwind.config.js</h4>
+                        <p class="text-xs text-muted">Complete Tailwind theme extensions (colors, fonts, shadows)</p>
+                      </div>
+                    </div>
+                    <div class="ds-card-actions">
+                      <button class="mini-btn" id="btnCopyTailwindConfig"><i class="fa-regular fa-copy"></i> Copy</button>
+                      <button class="mini-btn" id="btnDownloadTailwindConfig"><i class="fa-solid fa-download"></i> Download</button>
+                    </div>
+                  </div>
+                  <pre class="code-viewer-sm" id="viewerTailwindConfig"><code>// Loading config...</code></pre>
+                </div>
+
+                <!-- Figma Tokens Card -->
+                <div class="glass-card ds-export-card">
+                  <div class="ds-card-header">
+                    <div class="ds-card-title-group">
+                      <i class="fa-brands fa-figma text-purple"></i>
+                      <div>
+                        <h4>tokens.json (Figma Tokens Studio)</h4>
+                        <p class="text-xs text-muted">W3C Design Tokens format for Figma, Penpot & Style Dictionary</p>
+                      </div>
+                    </div>
+                    <div class="ds-card-actions">
+                      <button class="mini-btn" id="btnCopyFigmaTokens"><i class="fa-regular fa-copy"></i> Copy</button>
+                      <button class="mini-btn" id="btnDownloadFigmaTokens"><i class="fa-solid fa-download"></i> Download</button>
+                    </div>
+                  </div>
+                  <pre class="code-viewer-sm" id="viewerFigmaTokens"><code>// Loading tokens...</code></pre>
+                </div>
+
+              </div>
+
+              <!-- Color Palette Section -->
+              <div class="glass-card ds-section">
+                <div class="ds-section-header">
+                  <div class="ds-title-group">
+                    <i class="fa-solid fa-palette text-blue"></i>
+                    <div>
+                      <h3 class="ds-title">Extracted Color Palette</h3>
+                      <p class="ds-subtitle">Ranked by calculated element frequencies & dominant contrast roles (Click to copy)</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="color-swatches-grid" id="colorSwatchesGrid">
+                  <!-- Swatches rendered via JS -->
+                </div>
+              </div>
+
+              <!-- Typography Scale Section -->
+              <div class="glass-card ds-section">
+                <div class="ds-section-header">
+                  <div class="ds-title-group">
+                    <i class="fa-solid fa-font text-purple"></i>
+                    <div>
+                      <h3 class="ds-title">Typography Hierarchy & Font Ladder</h3>
+                      <p class="ds-subtitle">Detected font-family stacks, headings, weight variants & sizes</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="typography-ladder" id="typographyLadder">
+                  <!-- Typography scales rendered via JS -->
+                </div>
+              </div>
+
+              <!-- CSS Variables & Tokens Section -->
+              <div class="glass-card ds-section">
+                <div class="ds-section-header">
+                  <div class="ds-title-group">
+                    <i class="fa-solid fa-code text-emerald"></i>
+                    <div>
+                      <h3 class="ds-title">CSS Variables & Root Tokens</h3>
+                      <p class="ds-subtitle">Extracted <kbd>:root</kbd> and component-level custom properties</p>
+                    </div>
+                  </div>
+                  <div class="ds-header-tools">
+                    <input type="text" id="cssVarSearchInput" class="mini-search-input" placeholder="Search variable name...">
+                  </div>
+                </div>
+
+                <div class="css-variables-table-container">
+                  <table class="data-table" id="cssVariablesTable">
+                    <thead>
+                      <tr>
+                        <th>Property Name</th>
+                        <th>Computed Value</th>
+                        <th>Visual Preview</th>
+                        <th class="text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="cssVariablesTableBody">
+                      <!-- Populated via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ════════════════════════════════════════════════════════════════
+               TAB 4: COMPONENT SLICER (FOCUS MODE)
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="tab-panel" id="tabComponentSlicer">
+            <div class="glass-card slicer-card">
+              
+              <div class="ds-section-header">
+                <div class="ds-title-group">
+                  <i class="fa-solid fa-scissors text-purple"></i>
+                  <div>
+                    <h3 class="ds-title">Component Slicer & Section Isolator</h3>
+                    <p class="ds-subtitle">Select any individual section below to generate a focused, modular AI prompt for Cursor / Claude / v0</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slicer Section Grid -->
+              <div class="slicer-buttons-grid">
+                <button class="slicer-btn active" data-section="navbar">
+                  <i class="fa-solid fa-bars-staggered"></i>
+                  <div class="slicer-btn-text">
+                    <span class="slicer-name">Navbar / Header</span>
+                    <span class="slicer-desc">Logo, nav links, CTA, mobile drawer</span>
+                  </div>
+                </button>
+
+                <button class="slicer-btn" data-section="hero">
+                  <i class="fa-solid fa-rocket"></i>
+                  <div class="slicer-btn-text">
+                    <span class="slicer-name">Hero Section</span>
+                    <span class="slicer-desc">Headline, subhead, CTAs & visual</span>
+                  </div>
+                </button>
+
+                <button class="slicer-btn" data-section="features">
+                  <i class="fa-solid fa-table-cells"></i>
+                  <div class="slicer-btn-text">
+                    <span class="slicer-name">Feature Cards</span>
+                    <span class="slicer-desc">Multi-column icon grid & benefits</span>
+                  </div>
+                </button>
+
+                <button class="slicer-btn" data-section="pricing">
+                  <i class="fa-solid fa-tags"></i>
+                  <div class="slicer-btn-text">
+                    <span class="slicer-name">Pricing Table</span>
+                    <span class="slicer-desc">Tier cards, toggles & feature lists</span>
+                  </div>
+                </button>
+
+                <button class="slicer-btn" data-section="testimonials">
+                  <i class="fa-solid fa-star"></i>
+                  <div class="slicer-btn-text">
+                    <span class="slicer-name">Testimonials</span>
+                    <span class="slicer-desc">Customer reviews & social proof</span>
+                  </div>
+                </button>
+
+                <button class="slicer-btn" data-section="faq">
+                  <i class="fa-solid fa-circle-question"></i>
+                  <div class="slicer-btn-text">
+                    <span class="slicer-name">FAQ Accordion</span>
+                    <span class="slicer-desc">Expandable questions & answers</span>
+                  </div>
+                </button>
+
+                <button class="slicer-btn" data-section="footer">
+                  <i class="fa-solid fa-shoe-prints"></i>
+                  <div class="slicer-btn-text">
+                    <span class="slicer-name">Footer</span>
+                    <span class="slicer-desc">Multi-column links, social & copyright</span>
+                  </div>
+                </button>
+              </div>
+
+              <!-- Sliced Prompt Result Box -->
+              <div class="sliced-result-box">
+                <div class="sliced-header">
+                  <span class="sliced-title" id="slicedSectionTitle">Focused Component Prompt: Navbar / Header</span>
+                  <button class="btn-primary" id="btnCopySlicedPrompt">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>Copy Sliced Prompt</span>
+                  </button>
+                </div>
+                <textarea id="slicedPromptViewer" class="prompt-textarea-sm" readonly spellcheck="false"></textarea>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ════════════════════════════════════════════════════════════════
+               TAB 5: COMPONENTS & UI
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="tab-panel" id="tabComponents">
+            <div class="glass-card components-card">
+              
+              <div class="ds-section-header">
+                <div class="ds-title-group">
+                  <i class="fa-solid fa-cubes text-purple"></i>
+                  <div>
+                    <h3 class="ds-title">Detected UI Components & Layout Sections</h3>
+                    <p class="ds-subtitle">Semantic blocks, navigation structures, cards, grids, and interactive patterns</p>
+                  </div>
+                </div>
+                <div class="ds-header-tools">
+                  <button class="mini-btn" id="exportComponentsJsonBtn"><i class="fa-solid fa-file-code"></i> Export JSON</button>
+                </div>
+              </div>
+
+              <div class="components-layout-grid">
+                <div class="component-block">
+                  <h4 class="subcard-title"><i class="fa-solid fa-layer-group"></i> Detected Component Tree</h4>
+                  <div class="components-grid" id="componentsGrid"></div>
+                </div>
+
+                <div class="component-block">
+                  <h4 class="subcard-title"><i class="fa-solid fa-wand-magic"></i> Interaction & Motion Patterns</h4>
+                  <div class="interactions-grid" id="interactionsGrid"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ════════════════════════════════════════════════════════════════
+               TAB 6: ASSETS & MEDIA
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="tab-panel" id="tabAssets">
+            <div class="glass-card assets-card">
+              
+              <div class="ds-section-header">
+                <div class="ds-title-group">
+                  <i class="fa-solid fa-images text-emerald"></i>
+                  <div>
+                    <h3 class="ds-title">Images, SVGs & Media Inventory</h3>
+                    <p class="ds-subtitle">Extracted vector graphics, hero images, icons, and background textures</p>
+                  </div>
+                </div>
+                <div class="ds-header-tools">
+                  <div class="filter-pill-group" id="assetsFilterGroup">
+                    <button class="filter-pill active" data-filter="all">All (<span id="allAssetsCount">0</span>)</button>
+                    <button class="filter-pill" data-filter="svg">SVGs (<span id="svgAssetsCount">0</span>)</button>
+                    <button class="filter-pill" data-filter="image">Raster Images (<span id="rasterAssetsCount">0</span>)</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="assets-gallery-grid" id="assetsGalleryGrid"></div>
+
+            </div>
+          </div>
+
+          <!-- ════════════════════════════════════════════════════════════════
+               TAB 7: DOM & CSS RULES
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="tab-panel" id="tabRawDom">
+            <div class="glass-card inspector-card">
+              
+              <div class="ds-section-header">
+                <div class="ds-title-group">
+                  <i class="fa-solid fa-code-branch text-blue"></i>
+                  <div>
+                    <h3 class="ds-title">DOM Hierarchy & Computed CSS Rules</h3>
+                    <p class="ds-subtitle">Structured document breakdown, layout hierarchy, and style rules</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="inspector-split-view">
+                <div class="inspector-pane">
+                  <div class="pane-header">
+                    <span><i class="fa-solid fa-sitemap"></i> Simplified DOM Structure</span>
+                    <button class="mini-btn" id="copyDomBtn">Copy DOM</button>
+                  </div>
+                  <pre class="code-viewer" id="domStructureViewer"><code><!-- DOM representation --></code></pre>
+                </div>
+
+                <div class="inspector-pane">
+                  <div class="pane-header">
+                    <span><i class="fa-brands fa-css3"></i> Extracted CSS & Rules</span>
+                    <button class="mini-btn" id="copyCssBtn">Copy CSS</button>
+                  </div>
+                  <pre class="code-viewer" id="cssRulesViewer"><code>/* Extracted CSS */</code></pre>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- ═══════════════════ MODAL 1: 1-CLICK DEPLOY MODAL ═══════════════════ -->
+    <div class="modal-backdrop" id="deployModal" style="display: none;">
+      <div class="modal-card glass-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="fa-solid fa-cloud-arrow-up modal-icon text-indigo-400"></i>
+            <div>
+              <h3 class="modal-title">1-Click Edge Deployment</h3>
+              <p class="modal-subtitle">Publish your synthesized clone directly to GitHub and live Vercel edge URLs</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="closeDeployModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Deploy Provider Tabs -->
+          <div class="deploy-provider-tabs">
+            <button class="deploy-tab active" id="tabDeployVercel" data-provider="vercel">
+              <i class="fa-solid fa-triangle"></i>
+              <span>Vercel (Instant Preview URL)</span>
+            </button>
+            <button class="deploy-tab" id="tabDeployGithub" data-provider="github">
+              <i class="fa-brands fa-github"></i>
+              <span>GitHub Repository</span>
+            </button>
+          </div>
+
+          <!-- Vercel Deploy Panel -->
+          <div class="deploy-panel" id="panelDeployVercel">
+            <div class="form-group">
+              <label class="form-label">Project Name / Slug</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">https://</span>
+                <input type="text" id="vercelProjectName" class="form-input" value="siteprompter-kick-clone">
+                <span class="input-suffix">.vercel.app</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label flex justify-between">
+                <span><i class="fa-solid fa-key text-amber"></i> Vercel API Token (Optional / BYOK)</span>
+                <span class="text-muted text-xs">vercel_...</span>
+              </label>
+              <input type="password" id="vercelTokenInput" class="form-input font-mono text-xs" placeholder="Paste your Vercel Token (or leave empty for preview mode)">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Framework Preset</label>
+              <select id="vercelFrameworkPreset" class="form-select">
+                <option value="vite">Vite + React 19 + Tailwind CSS</option>
+                <option value="nextjs">Next.js 15 App Router</option>
+                <option value="html">Single File Static HTML</option>
+              </select>
+            </div>
+
+            <div class="deploy-status-box" id="vercelDeployStatus" style="display: none;">
+              <div class="deploy-step-line"><span class="step-dot active"></span> <span id="vercelStepText">Building edge artifacts...</span></div>
+              <div class="deploy-url-box" id="vercelUrlBox" style="display: none;">
+                <span class="text-xs text-muted">Live Preview URL:</span>
+                <a href="#" id="vercelLiveLink" target="_blank" class="live-url-link">https://siteprompter-kick-clone.vercel.app</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- GitHub Deploy Panel -->
+          <div class="deploy-panel" id="panelDeployGithub" style="display: none;">
+            <div class="form-group">
+              <label class="form-label flex justify-between">
+                <span><i class="fa-solid fa-key text-amber"></i> GitHub Personal Access Token (PAT)</span>
+                <span class="text-muted text-xs">ghp_...</span>
+              </label>
+              <input type="password" id="githubTokenInput" class="form-input font-mono text-xs" placeholder="Paste your GitHub Token (or leave empty for preview mode)">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Repository Name</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">github.com/</span>
+                <input type="text" id="githubRepoName" class="form-input" value="site-clone-project">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Commit Message</label>
+              <input type="text" id="githubCommitMsg" class="form-input" value="feat: autonomous high-fidelity site clone via SitePrompter AI">
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-container">
+                <input type="checkbox" id="githubPrivateToggle">
+                <span class="custom-checkbox"></span>
+                <span>Make repository private</span>
+              </label>
+            </div>
+
+            <div class="deploy-status-box" id="githubDeployStatus" style="display: none;">
+              <div class="deploy-step-line"><span class="step-dot active"></span> <span id="githubStepText">Pushing commit to main branch...</span></div>
+              <div class="deploy-url-box" id="githubUrlBox" style="display: none;">
+                <span class="text-xs text-muted">GitHub Repository:</span>
+                <a href="#" id="githubLiveLink" target="_blank" class="live-url-link">https://github.com/siteprompter-deploy/kick-stream-clone</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="mini-btn" id="btnCancelDeploy">Cancel</button>
+          <button class="btn-primary" id="btnExecuteDeploy">
+            <i class="fa-solid fa-rocket"></i>
+            <span>Deploy Now</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL 2: PRICING & UPGRADE MODAL ═══════════════════ -->
+    <div class="modal-backdrop" id="pricingModal" style="display: none;">
+      <div class="modal-card glass-card modal-xl">
+        <div class="modal-header text-center flex-col items-center">
+          <div class="pricing-header-badge"><i class="fa-solid fa-crown text-amber"></i> LemonSqueezy SaaS Billing</div>
+          <h3 class="pricing-modal-title">Upgrade Your Engineering Velocity</h3>
+          <p class="pricing-modal-desc">Unlock unlimited high-speed AI streaming, multi-page crawling, and edge deployments.</p>
+          
+          <!-- Billing Cycle Switch -->
+          <div class="billing-cycle-switch">
+            <button class="cycle-btn active" id="btnBillingMonthly">Monthly</button>
+            <button class="cycle-btn" id="btnBillingYearly">Yearly <span class="save-tag">Save 20%</span></button>
+          </div>
+          <button class="modal-close-btn absolute-top-right" id="closePricingModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="pricing-cards-grid">
+            
+            <!-- Tier 1: Free Starter -->
+            <div class="pricing-tier-card">
+              <span class="tier-name">Free Starter</span>
+              <div class="tier-price">$0 <span class="price-period">/mo</span></div>
+              <p class="tier-desc">For exploring site telemetry and basic prompt generation.</p>
+              <ul class="tier-features-list">
+                <li><i class="fa-solid fa-check text-emerald"></i> 50 Free Monthly Credits</li>
+                <li><i class="fa-solid fa-check text-emerald"></i> React & Vanilla HTML Export</li>
+                <li><i class="fa-solid fa-check text-emerald"></i> Design Tokens (.json / .css)</li>
+                <li><i class="fa-solid fa-check text-emerald"></i> Community Support</li>
+              </ul>
+              <button class="tier-btn secondary" id="btnTierStarter">Current Plan</button>
+            </div>
+
+            <!-- Tier 2: Pro Developer (Popular) -->
+            <div class="pricing-tier-card popular-card">
+              <div class="popular-ribbon"><i class="fa-solid fa-fire"></i> Most Popular</div>
+              <span class="tier-name text-indigo-400">Pro Developer</span>
+              <div class="tier-price" id="proPriceDisplay">$19 <span class="price-period">/mo</span></div>
+              <p class="tier-desc">For professional developers shipping client SaaS projects.</p>
+              <ul class="tier-features-list">
+                <li><i class="fa-solid fa-check text-emerald"></i> <strong>1,000 Generation Credits</strong> / mo</li>
+                <li><i class="fa-solid fa-check text-emerald"></i> <strong>Claude 3.7 & GPT-4o Streaming</strong></li>
+                <li><i class="fa-solid fa-check text-emerald"></i> <strong>1-Click GitHub & Vercel Deploy</strong></li>
+                <li><i class="fa-solid fa-check text-emerald"></i> <strong>Deep Multi-Page Site Crawler</strong></li>
+                <li><i class="fa-solid fa-check text-emerald"></i> All 5 Framework Engines</li>
+                <li><i class="fa-solid fa-check text-emerald"></i> Full Design System Exporter</li>
+              </ul>
+              <button class="tier-btn primary" id="btnUpgradePro">
+                <span>Upgrade to Pro ($19)</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+
+            <!-- Tier 3: Agency & Scale -->
+            <div class="pricing-tier-card">
+              <span class="tier-name text-purple">Agency & Scale</span>
+              <div class="tier-price" id="agencyPriceDisplay">$79 <span class="price-period">/mo</span></div>
+              <p class="tier-desc">For high-volume design teams and software agencies.</p>
+              <ul class="tier-features-list">
+                <li><i class="fa-solid fa-check text-emerald"></i> <strong>10,000 Monthly Credits</strong></li>
+                <li><i class="fa-solid fa-check text-emerald"></i> <strong>Unlimited BYOK Pass-through</strong></li>
+                <li><i class="fa-solid fa-check text-emerald"></i> Unlimited Team Workspaces</li>
+                <li><i class="fa-solid fa-check text-emerald"></i> Dedicated Webhook Integration</li>
+                <li><i class="fa-solid fa-check text-emerald"></i> Custom AST Compiler Rules</li>
+                <li><i class="fa-solid fa-check text-emerald"></i> Priority 24/7 SLA</li>
+              </ul>
+              <button class="tier-btn secondary" id="btnUpgradeAgency">Upgrade to Agency</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL 3: BYOK KEY MANAGER MODAL ═══════════════════ -->
+    <div class="modal-backdrop" id="byokModal" style="display: none;">
+      <div class="modal-card glass-card modal-md">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="fa-solid fa-key modal-icon text-amber"></i>
+            <div>
+              <h3 class="modal-title">Bring Your Own Key (BYOK)</h3>
+              <p class="modal-subtitle">Provide your personal LLM keys for zero-credit-limit generations</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="closeByokModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="modal-body space-y-4">
+          
+          <div class="byok-input-row">
+            <div class="byok-label-group">
+              <span class="byok-provider"><i class="fa-solid fa-brain text-purple"></i> Anthropic Claude Key</span>
+              <span class="byok-hint">Claude 3.7 Sonnet & 3.5 Haiku</span>
+            </div>
+            <div class="input-reveal-wrap">
+              <input type="password" id="byokAnthropic" class="form-input" placeholder="sk-ant-api03-...">
+              <button class="btn-reveal" data-target="byokAnthropic"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+
+          <div class="byok-input-row">
+            <div class="byok-label-group">
+              <span class="byok-provider"><i class="fa-solid fa-robot text-emerald"></i> OpenAI Key</span>
+              <span class="byok-hint">GPT-4o & o1 Models</span>
+            </div>
+            <div class="input-reveal-wrap">
+              <input type="password" id="byokOpenAI" class="form-input" placeholder="sk-proj-...">
+              <button class="btn-reveal" data-target="byokOpenAI"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+
+          <div class="byok-input-row">
+            <div class="byok-label-group">
+              <span class="byok-provider"><i class="fa-solid fa-code text-blue"></i> DeepSeek API Key</span>
+              <span class="byok-hint">DeepSeek-V3 & R1</span>
+            </div>
+            <div class="input-reveal-wrap">
+              <input type="password" id="byokDeepSeek" class="form-input" placeholder="sk-...">
+              <button class="btn-reveal" data-target="byokDeepSeek"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+
+          <div class="byok-input-row">
+            <div class="byok-label-group">
+              <span class="byok-provider"><i class="fa-brands fa-google text-amber"></i> Google Gemini Key</span>
+              <span class="byok-hint">Gemini 2.5 Pro & Flash</span>
+            </div>
+            <div class="input-reveal-wrap">
+              <input type="password" id="byokGemini" class="form-input" placeholder="AIzaSy...">
+              <button class="btn-reveal" data-target="byokGemini"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+
+          <div class="byok-test-status" id="byokTestStatus" style="display: none;">
+            <i class="fa-solid fa-circle-check text-emerald"></i>
+            <span>API Key verified! Latency: 124ms</span>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="mini-btn danger" id="btnClearByokKeys"><i class="fa-solid fa-trash-can"></i> Clear Keys</button>
+          <div class="flex gap-2">
+            <button class="mini-btn" id="btnTestByokConnection"><i class="fa-solid fa-satellite-dish"></i> Test Connection</button>
+            <button class="btn-primary" id="btnSaveByokKeys"><i class="fa-solid fa-floppy-disk"></i> Save Keys</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL 4: PROJECT LIBRARY & HISTORY DRAWER ═══════════════════ -->
+    <div class="modal-backdrop" id="historyModal" style="display: none;">
+      <div class="modal-card glass-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="fa-solid fa-folder-open modal-icon text-indigo-400"></i>
+            <div>
+              <h3 class="modal-title">Project Library & Saved Clones</h3>
+              <p class="modal-subtitle">Access your stored projects, favorite sites, and design token bundles</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="closeHistoryModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="history-search-row">
+            <input type="text" id="projectSearchInput" class="form-input" placeholder="Search saved projects by title or URL...">
+            <button class="mini-btn" id="btnFilterFavoritesOnly"><i class="fa-solid fa-star text-amber"></i> Favorites</button>
+          </div>
+
+          <div class="history-list" id="historyList">
+            <!-- Project Cards populated via JS -->
+          </div>
+        </div>
+
+        <div class="modal-footer justify-between">
+          <button class="mini-btn danger" id="clearHistoryBtn"><i class="fa-solid fa-trash-can"></i> Clear All Projects</button>
+          <button class="mini-btn" id="btnCloseProjectLibrary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ TOAST NOTIFICATIONS ═══════════════════ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <span>SitePrompter AI v2.5 Pro SaaS Studio • Autonomous Web Telemetry & Code Synthesis</span>
+        </div>
+        <div class="footer-center">
+          <span>Shortcuts: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> Synthesize • <kbd>Ctrl</kbd>+<kbd>S</kbd> Save • <kbd>Ctrl</kbd>+<kbd>D</kbd> Deploy</span>
+        </div>
+        <div class="footer-right">
+          <span class="status-indicator-dot online"></span>
+          <span>Engine Active (Port 3000)</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Application Logic -->
+  <script src="app.js?v=2.5.1"></script>
+</body>
+</html>
