@@ -1,11 +1,15 @@
-﻿{
+{
   "version": 2,
   "rewrites": [
-    { "source": "/pricing", "destination": "/api/pricing.js" },
-    { "source": "/terms", "destination": "/api/terms.js" },
-    { "source": "/privacy", "destination": "/api/privacy.js" },
-    { "source": "/refund", "destination": "/api/refund.js" },
-    { "source": "/refunds", "destination": "/api/refund.js" },
-    { "source": "/api/(.*)", "destination": "/api/index.js" }
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/pricing", "destination": "/api/index.js" },
+    { "source": "/pricing.html", "destination": "/api/index.js" },
+    { "source": "/terms", "destination": "/api/index.js" },
+    { "source": "/terms.html", "destination": "/api/index.js" },
+    { "source": "/privacy", "destination": "/api/index.js" },
+    { "source": "/privacy.html", "destination": "/api/index.js" },
+    { "source": "/refund", "destination": "/api/index.js" },
+    { "source": "/refunds", "destination": "/api/index.js" },
+    { "source": "/refund.html", "destination": "/api/index.js" }
   ]
 }

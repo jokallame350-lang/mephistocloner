@@ -31,10 +31,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 const { TERMS_HTML, PRIVACY_HTML, REFUND_HTML, PRICING_HTML } = require('./lib/legal-pages');
 
 // ─── LEGAL & PRICING PAGES ───────────────────────────────────────
-app.get(['/pricing', '/pricing.html'], (req, res) => res.send(PRICING_HTML));
-app.get(['/terms', '/terms.html', '/terms-of-service'], (req, res) => res.send(TERMS_HTML));
-app.get(['/privacy', '/privacy.html', '/privacy-policy'], (req, res) => res.send(PRIVACY_HTML));
-app.get(['/refund', '/refunds', '/refund.html', '/refund-policy'], (req, res) => res.send(REFUND_HTML));
+app.get(['/pricing', '/pricing.html', '/api/pricing'], (req, res) => res.send(PRICING_HTML));
+app.get(['/terms', '/terms.html', '/terms-of-service', '/api/terms'], (req, res) => res.send(TERMS_HTML));
+app.get(['/privacy', '/privacy.html', '/privacy-policy', '/api/privacy'], (req, res) => res.send(PRIVACY_HTML));
+app.get(['/refund', '/refunds', '/refund.html', '/refund-policy', '/api/refund', '/api/refunds'], (req, res) => res.send(REFUND_HTML));
 
 // ─── API ENDPOINTS ───────────────────────────────────────────────
 
