@@ -4,20 +4,20 @@ const app = require('../server');
 module.exports = (req, res) => {
   const url = (req.url || '').toLowerCase();
   if (url.includes('terms')) {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(TERMS_HTML);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(TERMS_HTML);
   }
   if (url.includes('privacy')) {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(PRIVACY_HTML);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(PRIVACY_HTML);
   }
   if (url.includes('refund')) {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(REFUND_HTML);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(REFUND_HTML);
   }
   if (url.includes('pricing') && !url.includes('/api/billing/plans')) {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(PRICING_HTML);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(PRICING_HTML);
   }
   return app(req, res);
 };
