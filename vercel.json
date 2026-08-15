@@ -1,9 +1,11 @@
 {
   "version": 2,
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    }
+    { "source": "/pricing", "destination": "/pricing.html" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/refund", "destination": "/refund.html" },
+    { "source": "/refunds", "destination": "/refund.html" },
+    { "source": "/api/(.*)", "destination": "/api/index.js" }
   ]
 }

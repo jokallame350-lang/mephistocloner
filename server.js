@@ -28,6 +28,13 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ─── LEGAL & PRICING PAGES ───────────────────────────────────────
+app.get('/pricing', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
+app.get('/refund', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refund.html')));
+app.get('/refunds', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refund.html')));
+
 // ─── API ENDPOINTS ───────────────────────────────────────────────
 
 /**
