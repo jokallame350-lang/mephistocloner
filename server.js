@@ -28,12 +28,13 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const { TERMS_HTML, PRIVACY_HTML, REFUND_HTML, PRICING_HTML } = require('./lib/legal-pages');
+
 // ─── LEGAL & PRICING PAGES ───────────────────────────────────────
-app.get('/pricing', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
-app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
-app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
-app.get('/refund', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refund.html')));
-app.get('/refunds', (req, res) => res.sendFile(path.join(__dirname, 'public', 'refund.html')));
+app.get(['/pricing', '/pricing.html'], (req, res) => res.send(PRICING_HTML));
+app.get(['/terms', '/terms.html', '/terms-of-service'], (req, res) => res.send(TERMS_HTML));
+app.get(['/privacy', '/privacy.html', '/privacy-policy'], (req, res) => res.send(PRIVACY_HTML));
+app.get(['/refund', '/refunds', '/refund.html', '/refund-policy'], (req, res) => res.send(REFUND_HTML));
 
 // ─── API ENDPOINTS ───────────────────────────────────────────────
 
