@@ -426,9 +426,14 @@ app.post('/api/download-zip', (req, res) => {
   }
 });
 
-// Fallback to SPA index.html
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Global Error Handler Middleware
+app.use((err, req, res, next) => {
+  console.error('[API ERROR]', err);
+  res.status(500).json({
+    success: false,
+    error: err.message || 'Internal Server Error',
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
 });
 
 // Start Server
