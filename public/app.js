@@ -1213,19 +1213,27 @@
     let previewHtml = '';
 
     if (code.includes('<!DOCTYPE html>') || code.includes('<html')) {
-      // Direct HTML file
       previewHtml = code;
     } else {
-      // Clean all import statements and export keywords for in-browser Babel execution
       const filteredLines = code.split('\n').filter(l => !l.trim().startsWith('import '));
-      let cleanedCode = filteredLines.join('\n')
+      let cleanedCode = filteredLines.join('\n');
+
+      let autoDetectedName = null;
+      const exportDefMatch = cleanedCode.match(/export\s+default\s+function\s+([A-Za-z0-9_]+)/);
+      if (exportDefMatch) {
+        autoDetectedName = exportDefMatch[1];
+      }
+
+      cleanedCode = cleanedCode
         .replace(/export\s+default\s+function\s+/g, 'function ')
         .replace(/export\s+default\s+/g, 'window.__RootComponent = ')
-        .replace(/export\s+(const|let|var|function|class)\s+/g, '$1 ');
+        .replace(/export\s+(const|let|var|function|class|type|interface)\s+/g, '$1 ');
 
-      cleanedCode += ';\nwindow.__RootComponent = typeof ProductionApp !== "undefined" ? ProductionApp : (typeof App !== "undefined" ? App : (typeof Page !== "undefined" ? Page : (typeof KickStreamApp !== "undefined" ? KickStreamApp : (typeof LinearDashboard !== "undefined" ? LinearDashboard : (typeof MephistoMailClone !== "undefined" ? MephistoMailClone : null)))));';
+      const declaredFunctions = [...cleanedCode.matchAll(/function\s+([A-Z][A-Za-z0-9_]*)/g)].map(m => m[1]);
+      const candidateName = autoDetectedName || declaredFunctions[declaredFunctions.length - 1] || declaredFunctions[0] || 'App';
 
-      // React / JSX Component wrap into Tailwind CDN + Babel runner with Lucide proxy
+      cleanedCode += `;\nif (!window.__RootComponent && typeof ${candidateName} !== "undefined") { window.__RootComponent = ${candidateName}; }`;
+
       const escapedJsx = JSON.stringify(cleanedCode);
 
       previewHtml = `<!DOCTYPE html>
@@ -1235,18 +1243,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; background: #060911; color: #f8fafc; font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #090d16; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
   </style>
 </head>
 <body>
@@ -1260,75 +1262,26 @@
 
       const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
-      // Smart SVG / Icon Proxy for all Lucide React icon names
       const IconProxy = (iconName) => (props) => {
         const cls = (props && props.className) || 'w-5 h-5';
-        const style = (props && props.style) || {};
-        const faMap = {
-          Sparkles: 'fa-wand-magic-sparkles text-purple-400',
-          Zap: 'fa-bolt text-amber-400',
-          ArrowRight: 'fa-arrow-right',
-          CheckCircle2: 'fa-circle-check text-emerald-400',
-          Check: 'fa-check text-emerald-400',
-          Shield: 'fa-shield-halved text-blue-400',
-          ShieldCheck: 'fa-shield-halved text-blue-400',
-          Copy: 'fa-copy',
-          Play: 'fa-play text-emerald-400',
-          Pause: 'fa-pause text-amber-400',
-          Volume2: 'fa-volume-high',
-          VolumeX: 'fa-volume-xmark',
-          Maximize: 'fa-expand',
-          Settings: 'fa-gear',
-          Eye: 'fa-eye',
-          Send: 'fa-paper-plane',
-          Smile: 'fa-face-smile',
-          MessageSquare: 'fa-message',
-          Heart: 'fa-heart text-pink-500',
-          Share2: 'fa-share-nodes',
-          Users: 'fa-users',
-          Radio: 'fa-tower-broadcast text-rose-500',
-          Layers: 'fa-layer-group',
-          Moon: 'fa-moon',
-          Sun: 'fa-sun text-amber-400',
-          Menu: 'fa-bars',
-          X: 'fa-xmark',
-          Github: 'fa-brands fa-github',
-          Plus: 'fa-plus',
-          Circle: 'fa-circle',
-          Mail: 'fa-envelope text-blue-400',
-          Lock: 'fa-lock',
-          RefreshCw: 'fa-rotate text-blue-400',
-          Trash2: 'fa-trash text-rose-400',
-          ExternalLink: 'fa-arrow-up-right-from-square',
-          Star: 'fa-star text-amber-400',
-          Inbox: 'fa-inbox',
-          FileText: 'fa-file-lines',
-          Terminal: 'fa-terminal',
-          Code: 'fa-code',
-          CreditCard: 'fa-credit-card',
-          TrendingUp: 'fa-arrow-trend-up',
-          Bot: 'fa-robot'
-        };
-        const iconClass = faMap[iconName] || 'fa-circle-dot';
-        return React.createElement('span', {
-          className: 'inline-flex items-center justify-center ' + cls,
-          style: style
-        }, React.createElement('i', { className: 'fa-solid ' + iconClass + (cls.includes('w-') ? '' : ' text-sm') }));
+        return React.createElement('span', { className: 'inline-flex items-center justify-center ' + cls }, React.createElement('i', { className: 'fa-solid fa-circle-dot' }));
       };
 
-      const iconNames = ['Sparkles', 'Zap', 'ArrowRight', 'CheckCircle2', 'Check', 'Shield', 'ShieldCheck', 'Copy', 'Play', 'Pause', 'Volume2', 'VolumeX', 'Maximize', 'Settings', 'Eye', 'Send', 'Smile', 'MessageSquare', 'Heart', 'Share2', 'Users', 'Radio', 'Layers', 'Moon', 'Sun', 'Menu', 'X', 'Github', 'Plus', 'Circle', 'Mail', 'Lock', 'RefreshCw', 'Trash2', 'ExternalLink', 'Star', 'Clock', 'ChevronDown', 'Search', 'Filter', 'Globe', 'Flame', 'HelpCircle', 'Laptop', 'Smartphone', 'Tablet', 'Sliders', 'Activity', 'Inbox', 'FileText', 'Terminal', 'Code', 'CreditCard', 'TrendingUp', 'Bot', 'Calendar', 'User', 'Download', 'Upload'];
-      iconNames.forEach(name => {
-        window[name] = IconProxy(name);
-      });
+      const iconNames = ['Sparkles', 'Zap', 'ArrowRight', 'CheckCircle2', 'Check', 'Shield', 'ShieldCheck', 'Copy', 'Play', 'Pause', 'Settings', 'Eye', 'Send', 'Smile', 'MessageSquare', 'Heart', 'Share2', 'Users', 'Radio', 'Layers', 'Moon', 'Sun', 'Menu', 'X', 'Github', 'Plus', 'Circle', 'Mail', 'Lock', 'RefreshCw', 'Trash2', 'ExternalLink', 'Star', 'Clock', 'ChevronDown', 'Search', 'Filter', 'Globe', 'Flame', 'HelpCircle', 'Laptop', 'Smartphone', 'Tablet', 'Sliders', 'Activity', 'Inbox', 'FileText', 'Terminal', 'Code', 'CreditCard', 'TrendingUp', 'Bot', 'Calendar', 'User', 'Download', 'Upload'];
+      iconNames.forEach(name => { window[name] = IconProxy(name); });
 
       try {
         window.__RootComponent = null;
         const codeToTransform = ${escapedJsx};
         const transformed = Babel.transform(codeToTransform, {
-          presets: [['react', { runtime: 'classic' }]]
+          filename: 'component.tsx',
+          presets: [
+            ['react', { runtime: 'classic' }],
+            'typescript'
+          ]
         }).code;
         
-        const runner = new Function('React', 'ReactDOM', 'useState', 'useEffect', 'useRef', 'useMemo', 'useCallback', ...iconNames, transformed + '; return window.__RootComponent || (typeof App !== "undefined" ? App : (typeof ProductionApp !== "undefined" ? ProductionApp : (typeof Page !== "undefined" ? Page : (typeof KickStreamApp !== "undefined" ? KickStreamApp : (typeof LinearDashboard !== "undefined" ? LinearDashboard : (typeof MephistoMailClone !== "undefined" ? MephistoMailClone : null))))));');
+        const runner = new Function('React', 'ReactDOM', 'useState', 'useEffect', 'useRef', 'useMemo', 'useCallback', ...iconNames, transformed + '; return window.__RootComponent || (typeof SynthesizedApp !== "undefined" ? SynthesizedApp : (typeof App !== "undefined" ? App : (typeof ProductionApp !== "undefined" ? ProductionApp : (typeof Page !== "undefined" ? Page : (typeof LandingPage !== "undefined" ? LandingPage : (typeof KickStreamApp !== "undefined" ? KickStreamApp : (typeof LinearDashboard !== "undefined" ? LinearDashboard : (typeof MephistoMailClone !== "undefined" ? MephistoMailClone : null))))))));');
         
         const ComponentToRender = runner(React, ReactDOM, useState, useEffect, useRef, useMemo, useCallback, ...iconNames.map(n => window[n]));
 
