@@ -27,15 +27,21 @@ app.use(express.static(path.join(__dirname, 'public')));
  * Health check & engine status
  */
 app.get('/api/health', (req, res) => {
-  const chromePath = (typeof findChromeExecutable === 'function' ? findChromeExecutable() : null) || (typeof findChromePath === 'function' ? findChromePath() : null);
+  let chromePath = null;
+  try {
+    if (typeof findChromeExecutable === 'function') chromePath = findChromeExecutable();
+    else if (typeof findChromePath === 'function') chromePath = findChromePath();
+  } catch (_) {
+    chromePath = null;
+  }
   res.json({
     status: 'ok',
-    version: '2.0.0-pro',
+    version: '2.5.0-pro',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     chromeAvailable: !!chromePath,
-    chromePath: chromePath || 'Not found',
-    sections: Object.keys(SECTION_DEFINITIONS),
+    chromePath: chromePath || 'Vercel Serverless / Cloud Runtime',
+    sections: Object.keys(SECTION_DEFINITIONS || {}),
   });
 });
 
