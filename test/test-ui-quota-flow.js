@@ -28,12 +28,12 @@ async function testUiQuotaFlow() {
     console.log(`   ✅ Target URL input default value: "${urlVal}" (Empty as requested)`);
     assert.strictEqual(urlVal, '', 'Target URL input must be empty by default');
 
-    // 2. Verify Credits display shows 150 (3 Hak)
+    // 2. Verify Credits display shows 150 (15 Hak)
     const creditsText = await page.$eval('#userCreditsDisplay', el => el.textContent.trim());
     const promptsBadge = await page.$eval('#userPromptsRemainingBadge', el => el.textContent.trim());
     console.log(`   ✅ User Credits Display: ${creditsText} (${promptsBadge})`);
     assert.strictEqual(creditsText, '150');
-    assert.strictEqual(promptsBadge, '3 Hak');
+    assert.strictEqual(promptsBadge, '15 Hak');
 
     // 3. Verify Quota Countdown Timer is active
     const timerText = await page.$eval('#quotaTimerText', el => el.textContent.trim());
@@ -53,7 +53,7 @@ async function testUiQuotaFlow() {
     const newBadge = await page.$eval('#userPromptsRemainingBadge', el => el.textContent.trim());
     console.log(`   ✅ After Pro Upgrade: ${newCredits} Credits (${newBadge})`);
     assert.strictEqual(newCredits, '600');
-    assert.strictEqual(newBadge, '12 Hak');
+    assert.strictEqual(newBadge, '60 Hak');
 
     console.log('\n======================================================');
     console.log('🎉 FRONTEND QUOTA & UI WORKFLOW TEST 100% PASSED!');

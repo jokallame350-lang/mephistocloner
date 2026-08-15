@@ -27,12 +27,12 @@ async function testVercelQuotaLive() {
     console.log(`   ✅ Target URL input default value: "${urlVal}" (Clean & empty)`);
     assert.strictEqual(urlVal, '', 'Target URL input must be empty');
 
-    // 2. Verify Initial Free Credits = 150 (3 Hak)
+    // 2. Verify Initial Free Credits = 150 (15 Hak)
     const credits = await page.$eval('#userCreditsDisplay', el => el.textContent.trim());
     const badge = await page.$eval('#userPromptsRemainingBadge', el => el.textContent.trim());
     console.log(`   ✅ Initial Credits: ${credits} (${badge})`);
     assert.strictEqual(credits, '150');
-    assert.strictEqual(badge, '3 Hak');
+    assert.strictEqual(badge, '15 Hak');
 
     // 3. Verify Live 24-Hour Quota Countdown Timer
     const timer = await page.$eval('#quotaTimerText', el => el.textContent.trim());
@@ -60,7 +60,7 @@ async function testVercelQuotaLive() {
     const proBadge = await page.$eval('#userPromptsRemainingBadge', el => el.textContent.trim());
     console.log(`   ✅ Pro Upgrade result: ${proCredits} Credits (${proBadge})`);
     assert.strictEqual(proCredits, '600');
-    assert.strictEqual(proBadge, '12 Hak');
+    assert.strictEqual(proBadge, '60 Hak');
 
     console.log('\n======================================================');
     console.log('🎉 LIVE VERCEL QUOTA & PRICING VERIFIED 100% OPERATIONAL!');
