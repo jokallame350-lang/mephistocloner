@@ -475,7 +475,7 @@ app.post('/api/analyze-url', async (req, res) => {
   }
 
   const userId = req.headers['x-user-id'] || req.body.userId || 'usr_guest_default';
-  const deduction = db.deductCredits(userId, 50);
+  const deduction = db.deductCredits(userId, 10);
 
   if (!deduction.success && !bypassCredit) {
     return res.status(402).json({
@@ -527,7 +527,7 @@ app.post('/api/analyze-raw', async (req, res) => {
   }
 
   const userId = req.headers['x-user-id'] || req.body.userId || 'usr_guest_default';
-  const deduction = db.deductCredits(userId, 50);
+  const deduction = db.deductCredits(userId, 10);
 
   if (!deduction.success && !bypassCredit) {
     return res.status(402).json({

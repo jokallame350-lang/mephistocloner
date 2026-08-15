@@ -763,14 +763,14 @@
     
     const credits = state.user.credits !== undefined ? state.user.credits : 150;
     const limit = state.user.creditsLimit !== undefined ? state.user.creditsLimit : 150;
-    const remainingPrompts = Math.floor(credits / 50);
+    const remainingPrompts = Math.floor(credits / 10);
 
     if (el.userCreditsDisplay) el.userCreditsDisplay.textContent = credits.toLocaleString();
     if (el.userCreditsLimitDisplay) el.userCreditsLimitDisplay.textContent = limit.toLocaleString();
     if (el.userPromptsRemainingBadge) el.userPromptsRemainingBadge.textContent = `${remainingPrompts} Hak`;
 
     if (el.creditsMeterPill) {
-      if (credits < 50) {
+      if (credits < 10) {
         el.creditsMeterPill.classList.add('credits-low');
       } else {
         el.creditsMeterPill.classList.remove('credits-low');
