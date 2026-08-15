@@ -264,6 +264,57 @@ body {
   color: var(--emerald);
 }
 
+.quota-countdown-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  color: #22d3ee;
+  padding: 6px 12px;
+  border-radius: var(--pill-radius);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.quota-time {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #ffffff;
+}
+.credits-meter-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 6px 12px;
+  border-radius: var(--pill-radius);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--amber);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.credits-meter-pill.credits-low {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+.credits-prompts-badge {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.credits-meter-pill.credits-low .credits-prompts-badge {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
 /* ═══════════════════ HERO BANNER ═══════════════════ */
 .hero-section {
   text-align: center;

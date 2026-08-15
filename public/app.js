@@ -8,16 +8,28 @@
 (function () {
   'use strict';
 
+  // Persistent User Fingerprint / Session ID
+  function getOrCreateUserId() {
+    let uid = localStorage.getItem('siteprompter_user_id');
+    if (!uid) {
+      uid = 'usr_guest_' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem('siteprompter_user_id', uid);
+    }
+    return uid;
+  }
+
   // Global State
   const state = {
+    userId: getOrCreateUserId(),
     user: {
-      id: 'usr_pro_001',
-      name: 'Alex Rivera',
-      email: 'alex.rivera@antigravity.dev',
-      plan: 'Pro Developer',
-      credits: 480,
-      creditsLimit: 1000,
+      id: getOrCreateUserId(),
+      name: 'Misafir Kullanıcı',
+      email: 'guest@siteprompter.io',
+      plan: 'Free Starter',
+      credits: 150,
+      creditsLimit: 150,
       workspaceId: 'ws_default',
+      nextReset: Date.now() + 24 * 60 * 60 * 1000
     },
     workspaces: [],
     currentWorkspaceId: 'ws_default',
@@ -117,6 +129,10 @@
     el.byokConfiguredDot = document.getElementById('byokConfiguredDot');
     el.btnOpenPricingModal = document.getElementById('btnOpenPricingModal');
     el.userCreditsDisplay = document.getElementById('userCreditsDisplay');
+    el.userCreditsLimitDisplay = document.getElementById('userCreditsLimitDisplay');
+    el.userPromptsRemainingBadge = document.getElementById('userPromptsRemainingBadge');
+    el.quotaCountdownPill = document.getElementById('quotaCountdownPill');
+    el.quotaTimerText = document.getElementById('quotaTimerText');
     el.creditsMeterPill = document.getElementById('creditsMeterPill');
     el.historyModalBtn = document.getElementById('historyModalBtn');
     el.historyCount = document.getElementById('historyCount');
@@ -372,16 +388,14 @@
   async function init() {
     queryElements();
     bindEvents();
+    startQuotaCountdown();
     await checkBackendHealth();
     await fetchUserProfile();
     await fetchWorkspaces();
     await fetchProjects();
     await fetchByokKeys();
     
-    // Auto-load starter project preview
-    if (state.projects.length > 0) {
-      loadProjectIntoStudio(state.projects[0]);
-    }
+    // Note: Do NOT auto-load Kick clone into studio to keep editor clean for arbitrary user sites
   }
 
   /* ═══════════════════ EVENT BINDINGS ═══════════════════ */
@@ -732,7 +746,9 @@
   /* ═══════════════════ USER & WORKSPACE SERVICES ═══════════════════ */
   async function fetchUserProfile() {
     try {
-      const res = await fetch('/api/auth/me');
+      const res = await fetch('/api/auth/me', {
+        headers: { 'x-user-id': state.userId }
+      });
       const data = await res.json();
       if (data.success && data.user) {
         state.user = data.user;
@@ -742,10 +758,46 @@
   }
 
   function renderUserProfile() {
-    if (el.userNameDisplay) el.userNameDisplay.textContent = state.user.name || 'Alex Rivera';
-    if (el.userPlanBadge) el.userPlanBadge.textContent = state.user.plan || 'Pro Developer';
-    if (el.userCreditsDisplay) el.userCreditsDisplay.textContent = (state.user.credits !== undefined ? state.user.credits : 480).toLocaleString();
+    if (el.userNameDisplay) el.userNameDisplay.textContent = state.user.name || 'Misafir Kullanıcı';
+    if (el.userPlanBadge) el.userPlanBadge.textContent = state.user.plan || 'Free Starter';
+    
+    const credits = state.user.credits !== undefined ? state.user.credits : 150;
+    const limit = state.user.creditsLimit !== undefined ? state.user.creditsLimit : 150;
+    const remainingPrompts = Math.floor(credits / 50);
+
+    if (el.userCreditsDisplay) el.userCreditsDisplay.textContent = credits.toLocaleString();
+    if (el.userCreditsLimitDisplay) el.userCreditsLimitDisplay.textContent = limit.toLocaleString();
+    if (el.userPromptsRemainingBadge) el.userPromptsRemainingBadge.textContent = `${remainingPrompts} Hak`;
+
+    if (el.creditsMeterPill) {
+      if (credits < 50) {
+        el.creditsMeterPill.classList.add('credits-low');
+      } else {
+        el.creditsMeterPill.classList.remove('credits-low');
+      }
+    }
+
     if (el.userAvatarImg && state.user.avatar) el.userAvatarImg.src = state.user.avatar;
+  }
+
+  function startQuotaCountdown() {
+    function tick() {
+      if (!state.user || !state.user.nextReset) return;
+      const remainingMs = Math.max(0, state.user.nextReset - Date.now());
+      const totalSec = Math.floor(remainingMs / 1000);
+      const hrs = Math.floor(totalSec / 3600);
+      const mins = Math.floor((totalSec % 3600) / 60);
+      const secs = totalSec % 60;
+
+      const formatted = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      if (el.quotaTimerText) el.quotaTimerText.textContent = formatted;
+
+      if (remainingMs <= 0) {
+        fetchUserProfile();
+      }
+    }
+    tick();
+    setInterval(tick, 1000);
   }
 
   async function fetchWorkspaces() {
@@ -1584,9 +1636,11 @@
   function openPricingModal() {
     if (el.pricingModal) el.pricingModal.style.display = 'flex';
   }
+  window.openPricingModal = openPricingModal;
   function closePricingModal() {
     if (el.pricingModal) el.pricingModal.style.display = 'none';
   }
+  window.closePricingModal = closePricingModal;
 
   function switchBillingCycle(cycle) {
     if (cycle === 'yearly') {
@@ -1606,7 +1660,10 @@
     try {
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': state.userId
+        },
         body: JSON.stringify({ planId })
       });
       const data = await res.json();
@@ -1614,7 +1671,7 @@
         state.user = data.user;
         renderUserProfile();
         closePricingModal();
-        showToast(`🎉 Upgraded to ${data.user.plan}! 1,000 Credits Added.`);
+        showToast(`🎉 ${data.user.plan} paketine başarıyla geçildi! Günlük ${data.user.credits} Kredi (${Math.floor(data.user.credits/50)} Site Analiz Hakkı) Tanımlandı.`);
       }
     } catch (err) {
       showToast(err.message, 'error');
@@ -1753,6 +1810,13 @@
 
   async function triggerAnalysis(mode) {
     if (state.isAnalyzing) return;
+
+    if (state.user.credits < 50) {
+      showToast(`⚠️ Krediniz yetersiz! Kalan: ${state.user.credits} Kredi / Gereken: 50 Kredi. Devam etmek için lütfen paketinizi yükseltin.`, 'error');
+      openPricingModal();
+      return;
+    }
+
     state.isAnalyzing = true;
 
     // Show pipeline progress
@@ -1770,6 +1834,7 @@
       if (!url) {
         showToast('Please enter a target website URL', 'error');
         resetPipeline();
+        state.isAnalyzing = false;
         return;
       }
       if (el.pipelineTargetUrl) el.pipelineTargetUrl.textContent = url;
@@ -1786,6 +1851,7 @@
       if (!html) {
         showToast('Please paste raw HTML markup', 'error');
         resetPipeline();
+        state.isAnalyzing = false;
         return;
       }
       endpoint = '/api/analyze-raw';
@@ -1805,12 +1871,30 @@
       
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': state.userId
+        },
         body: JSON.stringify(body)
       });
 
-      updatePipelineStep(3, 'Resolving Design Tokens & Palette...', 'active');
       const data = await res.json();
+
+      if (res.status === 402 || data.error === 'INSUFFICIENT_CREDITS') {
+        showToast('⚠️ Günlük 3 ücretsiz analiz hakkınızı (150 kredi) kullandınız! Lütfen paketinizi yükseltin veya kota yenilenmesini bekleyin.', 'error');
+        openPricingModal();
+        resetPipeline();
+        state.isAnalyzing = false;
+        if (data.credits !== undefined) {
+          state.user.credits = data.credits;
+          state.user.creditsLimit = data.creditsLimit;
+          state.user.nextReset = data.nextReset;
+          renderUserProfile();
+        }
+        return;
+      }
+
+      updatePipelineStep(3, 'Resolving Design Tokens & Palette...', 'active');
 
       if (!data.success) throw new Error(data.error || 'Failed to extract site telemetry');
 
@@ -1819,6 +1903,13 @@
 
       state.currentData = data;
       state.currentPrompt = data.prompt || '';
+
+      if (data.credits !== undefined) {
+        state.user.credits = data.credits;
+        state.user.creditsLimit = data.creditsLimit;
+        state.user.nextReset = data.nextReset;
+        renderUserProfile();
+      }
 
       // Complete Pipeline
       setTimeout(() => {
@@ -1835,6 +1926,7 @@
 
     } catch (err) {
       resetPipeline();
+      state.isAnalyzing = false;
       showToast(err.message, 'error');
     }
   }

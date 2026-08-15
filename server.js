@@ -261,67 +261,39 @@ app.post('/api/deploy/vercel', async (req, res) => {
   }
 });
 
-// ─── BILLING & CREDITS ────────────────────────────────────────────
+// ─── BILLING & CREDITS (DAILY QUOTA 150 / 600 / 1500) ──────────────
 app.get('/api/billing/plans', (req, res) => {
   res.json({
     success: true,
-    plans: [
-      {
-        id: 'free',
-        name: 'Starter',
-        priceMonthly: 0,
-        priceYearly: 0,
-        credits: 50,
-        features: ['50 monthly credits', 'React & Vanilla HTML export', 'Standard speed', 'Community support']
-      },
-      {
-        id: 'pro',
-        name: 'Pro Developer',
-        popular: true,
-        priceMonthly: 19,
-        priceYearly: 15,
-        credits: 1000,
-        features: ['1,000 monthly credits', 'Claude 3.7 & GPT-4o streaming', 'All 5 frameworks', '1-Click GitHub & Vercel deploy', 'Multi-page crawler', 'Priority execution']
-      },
-      {
-        id: 'agency',
-        name: 'Agency & Scale',
-        priceMonthly: 79,
-        priceYearly: 65,
-        credits: 10000,
-        features: ['10,000 monthly credits', 'Unlimited BYOK keys', 'Unlimited team workspaces', 'Dedicated webhook integration', 'Custom CSS compiler rules', '24/7 Priority SLA']
-      }
-    ]
+    plans: Object.values(db.PLAN_CONFIGS)
   });
 });
 
 app.post('/api/billing/checkout', (req, res) => {
+  const userId = req.headers['x-user-id'] || req.body.userId || 'usr_guest_default';
   const { planId = 'pro' } = req.body;
-  const user = db.getUser();
-  
-  if (planId === 'pro') {
-    db.updateUser({ plan: 'Pro Developer' });
-    db.addCredits(1000);
-  } else if (planId === 'agency') {
-    db.updateUser({ plan: 'Agency & Scale' });
-    db.addCredits(10000);
-  }
+  const result = db.upgradePlan(userId, planId);
 
   res.json({
     success: true,
-    message: 'Subscription successfully updated',
-    user: db.getUser(),
-    checkoutUrl: 'https://checkout.lemonsqueezy.com/buy/mock-siteprompter'
+    message: `${result.plan.name} paketine başarıyla geçildi!`,
+    user: result.user,
+    plan: result.plan,
+    checkoutUrl: 'https://checkout.lemonsqueezy.com/buy/siteprompter-pro'
   });
 });
 
 app.get('/api/billing/credits', (req, res) => {
-  const user = db.getUser();
+  const userId = req.headers['x-user-id'] || req.query.userId || 'usr_guest_default';
+  const user = db.getUser(userId);
   res.json({
     success: true,
     credits: user.credits,
     creditsLimit: user.creditsLimit,
-    plan: user.plan
+    remainingPrompts: user.remainingPrompts,
+    plan: user.plan,
+    timeUntilResetMs: user.timeUntilResetMs,
+    nextReset: user.nextReset
   });
 });
 
@@ -488,18 +460,31 @@ app.get('/api/community/stats', (req, res) => {
 
 // ─── CORE TELEMETRY & SCRAPER ENDPOINTS ────────────────────────────
 
-/**
- * Scrapes a live URL and generates structured telemetry + prompt
- */
 app.post('/api/analyze-url', async (req, res) => {
-  const { url, framework = 'vanilla-html', detailLevel = 'balanced', assetMode = 'original-urls', customInstructions = '' } = req.body;
+  const { url, framework = 'vanilla-html', detailLevel = 'balanced', assetMode = 'original-urls', customInstructions = '', bypassCredit = false } = req.body;
 
   if (!url) {
     return res.status(400).json({ success: false, error: 'URL is required' });
   }
 
+  const userId = req.headers['x-user-id'] || req.body.userId || 'usr_guest_default';
+  const deduction = db.deductCredits(userId, 50);
+
+  if (!deduction.success && !bypassCredit) {
+    return res.status(402).json({
+      success: false,
+      error: 'INSUFFICIENT_CREDITS',
+      message: deduction.message,
+      credits: deduction.credits,
+      creditsLimit: deduction.creditsLimit,
+      required: deduction.required,
+      timeUntilResetMs: deduction.timeUntilResetMs,
+      nextReset: deduction.nextReset
+    });
+  }
+
   try {
-    console.log(`[ANALYZING URL] -> ${url} (Framework: ${framework}, Detail: ${detailLevel})`);
+    console.log(`[ANALYZING URL] -> ${url} (Framework: ${framework}, Detail: ${detailLevel}) | User: ${userId} (${deduction.credits} credits left)`);
     const telemetry = await scrapeUrl(url);
     const prompt = compilePrompt(telemetry, { framework, detailLevel, assetMode, customInstructions });
     const tokenEstimate = estimateTokens(prompt);
@@ -512,6 +497,11 @@ app.post('/api/analyze-url', async (req, res) => {
       tokenEstimate,
       framework,
       detailLevel,
+      credits: deduction.credits,
+      creditsLimit: deduction.creditsLimit,
+      remainingPrompts: deduction.remainingPrompts,
+      timeUntilResetMs: deduction.timeUntilResetMs,
+      nextReset: deduction.nextReset
     });
   } catch (err) {
     console.error(`[SCRAPING ERROR]`, err.message);
@@ -523,14 +513,30 @@ app.post('/api/analyze-url', async (req, res) => {
  * Analyzes raw HTML & CSS input (offline mode)
  */
 app.post('/api/analyze-raw', async (req, res) => {
-  const { html, css = '', framework = 'vanilla-html', detailLevel = 'balanced', assetMode = 'original-urls', customInstructions = '' } = req.body;
+  const { html, css = '', framework = 'vanilla-html', detailLevel = 'balanced', assetMode = 'original-urls', customInstructions = '', bypassCredit = false } = req.body;
 
   if (!html) {
     return res.status(400).json({ success: false, error: 'HTML is required' });
   }
 
+  const userId = req.headers['x-user-id'] || req.body.userId || 'usr_guest_default';
+  const deduction = db.deductCredits(userId, 50);
+
+  if (!deduction.success && !bypassCredit) {
+    return res.status(402).json({
+      success: false,
+      error: 'INSUFFICIENT_CREDITS',
+      message: deduction.message,
+      credits: deduction.credits,
+      creditsLimit: deduction.creditsLimit,
+      required: deduction.required,
+      timeUntilResetMs: deduction.timeUntilResetMs,
+      nextReset: deduction.nextReset
+    });
+  }
+
   try {
-    console.log(`[ANALYZING RAW HTML] -> ${html.length} bytes (CSS: ${css.length} bytes)`);
+    console.log(`[ANALYZING RAW HTML] -> ${html.length} bytes | User: ${userId} (${deduction.credits} credits left)`);
     const telemetry = await analyzeRawHtml(html, css);
     const prompt = compilePrompt(telemetry, { framework, detailLevel, assetMode, customInstructions });
     const tokenEstimate = estimateTokens(prompt);
@@ -542,6 +548,11 @@ app.post('/api/analyze-raw', async (req, res) => {
       tokenEstimate,
       framework,
       detailLevel,
+      credits: deduction.credits,
+      creditsLimit: deduction.creditsLimit,
+      remainingPrompts: deduction.remainingPrompts,
+      timeUntilResetMs: deduction.timeUntilResetMs,
+      nextReset: deduction.nextReset
     });
   } catch (err) {
     console.error(`[RAW ANALYZE ERROR]`, err.message);
