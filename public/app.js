@@ -1274,7 +1274,14 @@
           ShieldCheck: 'fa-shield-halved text-blue-400',
           Copy: 'fa-copy',
           Play: 'fa-play text-emerald-400',
+          Pause: 'fa-pause text-amber-400',
           Volume2: 'fa-volume-high',
+          VolumeX: 'fa-volume-xmark',
+          Maximize: 'fa-expand',
+          Settings: 'fa-gear',
+          Eye: 'fa-eye',
+          Send: 'fa-paper-plane',
+          Smile: 'fa-face-smile',
           MessageSquare: 'fa-message',
           Heart: 'fa-heart text-pink-500',
           Share2: 'fa-share-nodes',
@@ -1293,7 +1300,14 @@
           RefreshCw: 'fa-rotate text-blue-400',
           Trash2: 'fa-trash text-rose-400',
           ExternalLink: 'fa-arrow-up-right-from-square',
-          Star: 'fa-star text-amber-400'
+          Star: 'fa-star text-amber-400',
+          Inbox: 'fa-inbox',
+          FileText: 'fa-file-lines',
+          Terminal: 'fa-terminal',
+          Code: 'fa-code',
+          CreditCard: 'fa-credit-card',
+          TrendingUp: 'fa-arrow-trend-up',
+          Bot: 'fa-robot'
         };
         const iconClass = faMap[iconName] || 'fa-circle-dot';
         return React.createElement('span', {
@@ -1302,7 +1316,7 @@
         }, React.createElement('i', { className: 'fa-solid ' + iconClass + (cls.includes('w-') ? '' : ' text-sm') }));
       };
 
-      const iconNames = ['Sparkles', 'Zap', 'ArrowRight', 'CheckCircle2', 'Check', 'Shield', 'ShieldCheck', 'Copy', 'Play', 'Volume2', 'MessageSquare', 'Heart', 'Share2', 'Users', 'Radio', 'Layers', 'Moon', 'Sun', 'Menu', 'X', 'Github', 'Plus', 'Circle', 'Mail', 'Lock', 'RefreshCw', 'Trash2', 'ExternalLink', 'Star', 'Clock', 'ChevronDown', 'Search', 'Filter', 'Globe', 'Flame', 'HelpCircle', 'Laptop', 'Smartphone', 'Tablet', 'Sliders', 'Activity'];
+      const iconNames = ['Sparkles', 'Zap', 'ArrowRight', 'CheckCircle2', 'Check', 'Shield', 'ShieldCheck', 'Copy', 'Play', 'Pause', 'Volume2', 'VolumeX', 'Maximize', 'Settings', 'Eye', 'Send', 'Smile', 'MessageSquare', 'Heart', 'Share2', 'Users', 'Radio', 'Layers', 'Moon', 'Sun', 'Menu', 'X', 'Github', 'Plus', 'Circle', 'Mail', 'Lock', 'RefreshCw', 'Trash2', 'ExternalLink', 'Star', 'Clock', 'ChevronDown', 'Search', 'Filter', 'Globe', 'Flame', 'HelpCircle', 'Laptop', 'Smartphone', 'Tablet', 'Sliders', 'Activity', 'Inbox', 'FileText', 'Terminal', 'Code', 'CreditCard', 'TrendingUp', 'Bot', 'Calendar', 'User', 'Download', 'Upload'];
       iconNames.forEach(name => {
         window[name] = IconProxy(name);
       });
